@@ -6,10 +6,22 @@
 
 #include "GestorBiblioteca.h"
 
-int *
-conexion_1_svc(char *argp, struct svc_req *rqstp)
+// Estructuras de datos para la práctica 1.
+TLibro *Biblioteca = NULL; // Vector dinámico de libros
+int NumLibros = 0;
+// Número de libros almacenados en el vector dinámico.
+int Tama = 0;
+// Tamaño del vector dinámico. El incremento será por bloques de 4 libros.
+int IdAdmin = -1;
+// Copia del Identificador de Administración enviado al usuario.
+Cadena NomFichero = "";
+// Copia del nombre del último fichero binario que se ha cargado en memoria.
+int CampoOrdenacion = 0;
+// Copia del último campo de ordenación realizado.
+
+int *conexion_1_svc(char *argp, struct svc_req *rqstp)
 {
-	static int  result;
+	static int result;
 
 	/*
 	 * insert server code here
@@ -23,7 +35,7 @@ conexion_1_svc(char *argp, struct svc_req *rqstp)
 bool_t *
 desconexion_1_svc(int *argp, struct svc_req *rqstp)
 {
-	static bool_t  result;
+	static bool_t result;
 
 	/*
 	 * insert server code here
@@ -34,10 +46,9 @@ desconexion_1_svc(int *argp, struct svc_req *rqstp)
 	return &result;
 }
 
-int *
-cargardatos_1_svc(TConsulta *argp, struct svc_req *rqstp)
+int *cargardatos_1_svc(TConsulta *argp, struct svc_req *rqstp)
 {
-	static int  result;
+	static int result;
 
 	/*
 	 * insert server code here
@@ -49,7 +60,7 @@ cargardatos_1_svc(TConsulta *argp, struct svc_req *rqstp)
 bool_t *
 guardardatos_1_svc(int *argp, struct svc_req *rqstp)
 {
-	static bool_t  result;
+	static bool_t result;
 
 	/*
 	 * insert server code here
@@ -58,10 +69,9 @@ guardardatos_1_svc(int *argp, struct svc_req *rqstp)
 	return &result;
 }
 
-int *
-nuevolibro_1_svc(TNuevo *argp, struct svc_req *rqstp)
+int *nuevolibro_1_svc(TNuevo *argp, struct svc_req *rqstp)
 {
-	static int  result;
+	static int result;
 
 	/*
 	 * insert server code here
@@ -70,10 +80,9 @@ nuevolibro_1_svc(TNuevo *argp, struct svc_req *rqstp)
 	return &result;
 }
 
-int *
-comprar_1_svc(TComRet *argp, struct svc_req *rqstp)
+int *comprar_1_svc(TComRet *argp, struct svc_req *rqstp)
 {
-	static int  result;
+	static int result;
 
 	/*
 	 * insert server code here
@@ -82,10 +91,9 @@ comprar_1_svc(TComRet *argp, struct svc_req *rqstp)
 	return &result;
 }
 
-int *
-retirar_1_svc(TComRet *argp, struct svc_req *rqstp)
+int *retirar_1_svc(TComRet *argp, struct svc_req *rqstp)
 {
-	static int  result;
+	static int result;
 
 	/*
 	 * insert server code here
@@ -97,7 +105,7 @@ retirar_1_svc(TComRet *argp, struct svc_req *rqstp)
 bool_t *
 ordenar_1_svc(TOrdenacion *argp, struct svc_req *rqstp)
 {
-	static bool_t  result;
+	static bool_t result;
 
 	/*
 	 * insert server code here
@@ -106,10 +114,9 @@ ordenar_1_svc(TOrdenacion *argp, struct svc_req *rqstp)
 	return &result;
 }
 
-int *
-nlibros_1_svc(int *argp, struct svc_req *rqstp)
+int *nlibros_1_svc(int *argp, struct svc_req *rqstp)
 {
-	static int  result;
+	static int result;
 
 	/*
 	 * insert server code here
@@ -118,10 +125,9 @@ nlibros_1_svc(int *argp, struct svc_req *rqstp)
 	return &result;
 }
 
-int *
-buscar_1_svc(TConsulta *argp, struct svc_req *rqstp)
+int *buscar_1_svc(TConsulta *argp, struct svc_req *rqstp)
 {
-	static int  result;
+	static int result;
 
 	/*
 	 * insert server code here
@@ -133,7 +139,7 @@ buscar_1_svc(TConsulta *argp, struct svc_req *rqstp)
 TLibro *
 descargar_1_svc(TPosicion *argp, struct svc_req *rqstp)
 {
-	static TLibro  result;
+	static TLibro result;
 
 	/*
 	 * insert server code here
@@ -142,10 +148,9 @@ descargar_1_svc(TPosicion *argp, struct svc_req *rqstp)
 	return &result;
 }
 
-int *
-prestar_1_svc(TPosicion *argp, struct svc_req *rqstp)
+int *prestar_1_svc(TPosicion *argp, struct svc_req *rqstp)
 {
-	static int  result;
+	static int result;
 
 	/*
 	 * insert server code here
@@ -154,10 +159,9 @@ prestar_1_svc(TPosicion *argp, struct svc_req *rqstp)
 	return &result;
 }
 
-int *
-devolver_1_svc(TPosicion *argp, struct svc_req *rqstp)
+int *devolver_1_svc(TPosicion *argp, struct svc_req *rqstp)
 {
-	static int  result;
+	static int result;
 
 	/*
 	 * insert server code here

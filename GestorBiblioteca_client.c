@@ -115,6 +115,31 @@ void gestorbiblioteca_1(char *host)
 #endif /* DEBUG */
 }
 
+void menu();
+int menuPrincipal();
+void inteligenciaMenuPrincipal(int opcionElegida);
+void inteligenciaMenuAdministracion(int opcionElegida);
+
+int main(int argc, char *argv[])
+{
+	char *host;
+
+	if (argc < 2)
+	{
+		printf("usage: %s server_host\n", argv[0]);
+		exit(1);
+	}
+	host = argv[1];
+	gestorbiblioteca_1(host);
+
+	/*
+	 * insert client code here
+	 */
+
+	menu();
+
+	exit(0);
+}
 int menuPrincipal()
 {
 	int opcionElegida = 0;
@@ -159,60 +184,101 @@ int menuAdministracion()
 	return opcionElegida;
 }
 
-void menu(){
-	int opcionElegida = menuPrincipal();
-	switch(opcionElegida){
-		case 1:{
-			opcionElegida = menuAdministracion();
-			break;
-		}
-		case 2:{
-			
-			break;
-		}
-		case 3:{
-			
-			break;
-		}
-		case 4:{
-			
-			break;
-		}
-		case 0:{
-			
-			break;
-		}
-		default:{
-			printf("Error\n");
-		}
-	}
-}
-
-void inteligenciaMenuPrincipal(){
-
-}
-
-void inteligenciaMenuAdministracion(){
-	
-}
-
-int main(int argc, char *argv[])
+void inteligenciaMenuPrincipal(int opcionElegida)
 {
-	char *host;
-
-	if (argc < 2)
+	switch (opcionElegida)
 	{
-		printf("usage: %s server_host\n", argv[0]);
-		exit(1);
+	case 1:
+	{
+		opcionElegida = menuAdministracion();		   // Muestra por pantalla el menú de admnistración y guarda la opción elegida en la variable.
+		inteligenciaMenuAdministracion(opcionElegida); // Realiza lo pedido.
+		break;
 	}
-	host = argv[1];
-	gestorbiblioteca_1(host);
+	case 2:
+	{
 
-	/*
-	 * insert client code here
-	 */
+		break;
+	}
+	case 3:
+	{
 
-	menu();
+		break;
+	}
+	case 4:
+	{
 
-	exit(0);
+		break;
+	}
+	case 0:
+	{
+
+		break;
+	}
+	default:
+	{
+		printf("Error\n");
+	}
+	}
+}
+
+void inteligenciaMenuAdministracion(int opcionElegida)
+{
+	switch (opcionElegida)
+	{
+	case 1:
+	{
+
+		break;
+	}
+	case 2:
+	{
+
+		break;
+	}
+	case 3:
+	{
+
+		break;
+	}
+	case 4:
+	{
+
+		break;
+	}
+	case 5:
+	{
+
+		break;
+	}
+	case 6:
+	{
+
+		break;
+	}
+	case 7:
+	{
+
+		break;
+	}
+	case 8:
+	{
+
+		break;
+	}
+	case 0:
+	{
+
+		break;
+	}
+	default:
+	{
+		printf("Error\n");
+	}
+	}
+}
+
+void menu()
+{
+	const int opcionElegida = menuPrincipal(); // Muestra por pantalla el mené principal y guarda la opción elegida en la variable.
+	inteligenciaMenuPrincipal(opcionElegida);  // Realiza lo pedido.
 }
