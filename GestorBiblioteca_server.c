@@ -19,15 +19,25 @@ Cadena NomFichero = "";
 int CampoOrdenacion = 0;
 // Copia del último campo de ordenación realizado.
 
-int *conexion_1_svc(char *argp, struct svc_req *rqstp)
+int *conexion_1_svc(int *argp, struct svc_req *rqstp)
 {
 	static int result;
+	int contrasenha = *argp;
 
-	/*
-	 * insert server code here
-	 */
-
-	printf("Server: new client connected\n");
+	if (contrasenha != 1234)
+	{
+		result = -2;
+	}
+	else if (IdAdmin != -1)
+	{ // Si IdAdmin es igual a -1, no hay ningún administrador conectado entonces.
+		result = -1;
+	}
+	else
+	{
+		// Como todo está correcto, podemos entrar como administradores:
+		IdAdmin = 1 + rand() % RAND_MAX;
+		result = IdAdmin;
+	}
 
 	return &result;
 }
@@ -40,8 +50,6 @@ desconexion_1_svc(int *argp, struct svc_req *rqstp)
 	/*
 	 * insert server code here
 	 */
-
-	printf("Server: client disconnected\n");
 
 	return &result;
 }

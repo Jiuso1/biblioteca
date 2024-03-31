@@ -5,12 +5,17 @@
  */
 
 #include "GestorBiblioteca.h"
+#include <unistd.h>
+#include <stdio.h>
+
+int menuPrincipal();
+int menuAdministracion();
 
 void gestorbiblioteca_1(char *host)
 {
 	CLIENT *clnt;
 	int *result_1;
-	char conexion_1_arg;
+	int conexion_1_arg;
 	bool_t *result_2;
 	int desconexion_1_arg;
 	int *result_3;
@@ -44,8 +49,41 @@ void gestorbiblioteca_1(char *host)
 		exit(1);
 	}
 #endif /* DEBUG */
+	int opcionElegida = menuPrincipal();
+	int contrasenha = 0;
 
-	result_1 = conexion_1(&conexion_1_arg, clnt);
+	switch (opcionElegida)
+	{
+	case 1:
+	{
+		printf("Por favor inserte la contraseña de Administracion:\n");
+		scanf("%d", &contrasenha);
+		conexion_1_arg = contrasenha;
+		result_1 = conexion_1(&conexion_1_arg, clnt);
+		if (*result_1 == -2)
+		{
+			printf("ERROR: la contrasenha introducida es incorrecta\n");
+		}
+		else if (*result_1 == -1)
+		{
+			printf("ERROR: ya hay un administrador logueado\n");
+		}
+		else if (result_1 == (int *)NULL)
+		{
+			clnt_perror(clnt, "call failed");
+		}
+		else
+		{
+			printf("*** Contraseña correcta, puede acceder al menu de Administracion.**\n");
+			printf("Introduzca cualquier caracter para continuar.....\n");
+			int noImporta = 0;
+			scanf("%d", &noImporta);
+			opcionElegida = menuAdministracion();
+		}
+		break;
+	}
+	}
+	/*result_1 = conexion_1(&conexion_1_arg, clnt);
 	if (result_1 == (int *)NULL)
 	{
 		clnt_perror(clnt, "call failed");
@@ -109,16 +147,11 @@ void gestorbiblioteca_1(char *host)
 	if (result_13 == (int *)NULL)
 	{
 		clnt_perror(clnt, "call failed");
-	}
+	}*/
 #ifndef DEBUG
 	clnt_destroy(clnt);
 #endif /* DEBUG */
 }
-
-void menu();
-int menuPrincipal();
-void inteligenciaMenuPrincipal(int opcionElegida);
-void inteligenciaMenuAdministracion(int opcionElegida);
 
 int main(int argc, char *argv[])
 {
@@ -131,13 +164,6 @@ int main(int argc, char *argv[])
 	}
 	host = argv[1];
 	gestorbiblioteca_1(host);
-
-	/*
-	 * insert client code here
-	 */
-
-	menu();
-
 	exit(0);
 }
 int menuPrincipal()
@@ -182,103 +208,4 @@ int menuAdministracion()
 		scanf("%d", &opcionElegida);
 	} while (opcionElegida < 0 || opcionElegida > 8);
 	return opcionElegida;
-}
-
-void inteligenciaMenuPrincipal(int opcionElegida)
-{
-	switch (opcionElegida)
-	{
-	case 1:
-	{
-		opcionElegida = menuAdministracion();		   // Muestra por pantalla el menú de admnistración y guarda la opción elegida en la variable.
-		inteligenciaMenuAdministracion(opcionElegida); // Realiza lo pedido.
-		break;
-	}
-	case 2:
-	{
-
-		break;
-	}
-	case 3:
-	{
-
-		break;
-	}
-	case 4:
-	{
-
-		break;
-	}
-	case 0:
-	{
-
-		break;
-	}
-	default:
-	{
-		printf("Error\n");
-	}
-	}
-}
-
-void inteligenciaMenuAdministracion(int opcionElegida)
-{
-	switch (opcionElegida)
-	{
-	case 1:
-	{
-
-		break;
-	}
-	case 2:
-	{
-
-		break;
-	}
-	case 3:
-	{
-
-		break;
-	}
-	case 4:
-	{
-
-		break;
-	}
-	case 5:
-	{
-
-		break;
-	}
-	case 6:
-	{
-
-		break;
-	}
-	case 7:
-	{
-
-		break;
-	}
-	case 8:
-	{
-
-		break;
-	}
-	case 0:
-	{
-
-		break;
-	}
-	default:
-	{
-		printf("Error\n");
-	}
-	}
-}
-
-void menu()
-{
-	const int opcionElegida = menuPrincipal(); // Muestra por pantalla el mené principal y guarda la opción elegida en la variable.
-	inteligenciaMenuPrincipal(opcionElegida);  // Realiza lo pedido.
 }
