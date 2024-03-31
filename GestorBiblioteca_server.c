@@ -46,10 +46,14 @@ bool_t *
 desconexion_1_svc(int *argp, struct svc_req *rqstp)
 {
 	static bool_t result;
+	int idAdminCliente = *argp;
 
-	/*
-	 * insert server code here
-	 */
+	if(IdAdmin != idAdminCliente){
+		result = FALSE;
+	}else{
+		IdAdmin = -1;//idAdmin pasa a ser -1 porque ya no hay ningún administrador conectado.
+		result = TRUE;
+	}
 
 	return &result;
 }

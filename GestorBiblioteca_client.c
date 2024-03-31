@@ -51,6 +51,7 @@ void gestorbiblioteca_1(char *host)
 #endif /* DEBUG */
 	int opcionElegida = menuPrincipal();
 	int contrasenha = 0;
+	int idAdministrador = 0;
 
 	switch (opcionElegida)
 	{
@@ -74,11 +75,29 @@ void gestorbiblioteca_1(char *host)
 		}
 		else
 		{
+			idAdministrador = *result_1; // Guardamos el id generado por el servidor en el cliente administrador.
 			printf("*** Contraseña correcta, puede acceder al menu de Administracion.**\n");
 			printf("Introduzca cualquier caracter para continuar.....\n");
 			int noImporta = 0;
 			scanf("%d", &noImporta);
 			opcionElegida = menuAdministracion();
+			switch (opcionElegida)
+			{
+			case 0:
+			{
+				desconexion_1_arg = idAdministrador;
+				result_2 = desconexion_1(&desconexion_1_arg, clnt);
+				if (*result_2 == FALSE)
+				{
+					printf("ERROR: el id administrador no coincide con el del servidor\n");
+				}
+				else if (*result_2 == TRUE)
+				{
+					printf("Ha cerrado sesion con exito\n");
+				}
+				break;
+			}
+			}
 		}
 		break;
 	}
