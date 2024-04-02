@@ -52,6 +52,7 @@ void gestorbiblioteca_1(char *host)
 	int opcionElegida = menuPrincipal();
 	int contrasenha = 0;
 	int idAdministrador = 0;
+	Cadena nombreFichero = "";
 
 	switch (opcionElegida)
 	{
@@ -61,17 +62,17 @@ void gestorbiblioteca_1(char *host)
 		scanf("%d", &contrasenha);
 		conexion_1_arg = contrasenha;
 		result_1 = conexion_1(&conexion_1_arg, clnt);
-		if (*result_1 == -2)
+		if (result_1 == (int *)NULL)
+		{
+			clnt_perror(clnt, "call failed");
+		}
+		else if (*result_1 == -2)
 		{
 			printf("ERROR: la contrasenha introducida es incorrecta\n");
 		}
 		else if (*result_1 == -1)
 		{
 			printf("ERROR: ya hay un administrador logueado\n");
-		}
-		else if (result_1 == (int *)NULL)
-		{
-			clnt_perror(clnt, "call failed");
 		}
 		else
 		{
@@ -87,7 +88,11 @@ void gestorbiblioteca_1(char *host)
 			{
 				desconexion_1_arg = idAdministrador;
 				result_2 = desconexion_1(&desconexion_1_arg, clnt);
-				if (*result_2 == FALSE)
+				if (result_2 == (bool_t *)NULL)
+				{
+					clnt_perror(clnt, "call failed");
+				}
+				else if (*result_2 == FALSE)
 				{
 					printf("ERROR: el id administrador no coincide con el del servidor\n");
 				}
@@ -95,6 +100,15 @@ void gestorbiblioteca_1(char *host)
 				{
 					printf("Ha cerrado sesion con exito\n");
 				}
+				break;
+			}
+			case 1:
+			{
+				printf("Introduce el nombre del fichero de datos:\n");
+				scanf("%s", nombreFichero);
+				strcpy(cargardatos_1_arg.Datos, nombreFichero);
+				cargardatos_1_arg.Ida = idAdministrador;
+				result_3 = cargardatos_1(&cargardatos_1_arg, clnt);
 				break;
 			}
 			}

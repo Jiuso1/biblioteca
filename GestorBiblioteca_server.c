@@ -48,10 +48,13 @@ desconexion_1_svc(int *argp, struct svc_req *rqstp)
 	static bool_t result;
 	int idAdminCliente = *argp;
 
-	if(IdAdmin != idAdminCliente){
+	if (IdAdmin != idAdminCliente)
+	{
 		result = FALSE;
-	}else{
-		IdAdmin = -1;//idAdmin pasa a ser -1 porque ya no hay ningún administrador conectado.
+	}
+	else
+	{
+		IdAdmin = -1; // idAdmin pasa a ser -1 porque ya no hay ningún administrador conectado.
 		result = TRUE;
 	}
 
@@ -61,10 +64,28 @@ desconexion_1_svc(int *argp, struct svc_req *rqstp)
 int *cargardatos_1_svc(TConsulta *argp, struct svc_req *rqstp)
 {
 	static int result;
+	Cadena nombreFichero = "";
+	const int idAdminCliente = argp->Ida;
+	FILE *ficheroDatos = NULL;
 
-	/*
-	 * insert server code here
-	 */
+	strcpy(nombreFichero, argp->Datos);
+
+	if (IdAdmin != idAdminCliente)
+	{
+		result = -1;
+	}
+	else
+	{
+		ficheroDatos = fopen(nombreFichero, "rb");
+		if (ficheroDatos == NULL)
+		{
+			result = 0;
+		}
+		else
+		{
+			// El id administrador coincide y además hemos conseguido abrir el fichero:
+		}
+	}
 
 	return &result;
 }
