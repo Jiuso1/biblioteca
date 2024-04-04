@@ -78,7 +78,7 @@ int *cargardatos_1_svc(TConsulta *argp, struct svc_req *rqstp)
 	else
 	{
 		ficheroDatos = fopen(nombreFichero, "rb"); // Abrimos el fichero en modo lectura y modo binario.
-		if (ficheroDatos == NULL)				   
+		if (ficheroDatos == NULL)
 		{
 			result = 0;
 		}
@@ -163,9 +163,7 @@ int *nlibros_1_svc(int *argp, struct svc_req *rqstp)
 {
 	static int result;
 
-	/*
-	 * insert server code here
-	 */
+	result = NumLibros; // Solo queremos retornar el número de libros.
 
 	return &result;
 }

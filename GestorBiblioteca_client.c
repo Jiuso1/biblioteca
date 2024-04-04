@@ -10,6 +10,7 @@
 
 int menuPrincipal();
 int menuAdministracion();
+void esperarEntradaPorConsola();
 
 void gestorbiblioteca_1(char *host)
 {
@@ -53,6 +54,8 @@ void gestorbiblioteca_1(char *host)
 	int contrasenha = 0;
 	int idAdministrador = 0;
 	Cadena nombreFichero = "";
+	int NumLibros = 0;
+	TLibro libro = {}; // Los struct se inicializan así.
 
 	switch (opcionElegida)
 	{
@@ -78,45 +81,77 @@ void gestorbiblioteca_1(char *host)
 		{
 			idAdministrador = *result_1; // Guardamos el id generado por el servidor en el cliente administrador.
 			printf("*** Contraseña correcta, puede acceder al menu de Administracion.**\n");
-			printf("Introduzca cualquier numero para continuar.....\n");
-			int noImporta = 0;
-			scanf("%d", &noImporta);
-			opcionElegida = menuAdministracion();
-			switch (opcionElegida)
+			esperarEntradaPorConsola(); // Esperamos a que el usuario pulse cualquier tecla.
+			do
 			{
-			case 0:
-			{
-				desconexion_1_arg = idAdministrador;
-				result_2 = desconexion_1(&desconexion_1_arg, clnt);
-				if (result_2 == (bool_t *)NULL)
+				opcionElegida = menuAdministracion();
+				switch (opcionElegida)
 				{
-					clnt_perror(clnt, "call failed");
-				}
-				else if (*result_2 == FALSE)
+				case 0:
 				{
-					printf("ERROR: el id administrador no coincide con el del servidor\n");
+					desconexion_1_arg = idAdministrador;
+					result_2 = desconexion_1(&desconexion_1_arg, clnt);
+					if (result_2 == (bool_t *)NULL)
+					{
+						clnt_perror(clnt, "call failed");
+					}
+					else if (*result_2 == FALSE)
+					{
+						printf("ERROR: el id administrador no coincide con el del servidor\n");
+					}
+					else if (*result_2 == TRUE)
+					{
+						printf("Ha cerrado sesion con exito\n");
+					}
+					break;
 				}
-				else if (*result_2 == TRUE)
+				case 1:
 				{
-					printf("Ha cerrado sesion con exito\n");
+					printf("Introduce el nombre del fichero de datos:\n");
+					scanf("%s", nombreFichero);
+					strcpy(cargardatos_1_arg.Datos, nombreFichero);
+					cargardatos_1_arg.Ida = idAdministrador;
+					result_3 = cargardatos_1(&cargardatos_1_arg, clnt);
+					break;
 				}
-				break;
-			}
-			case 1:
-			{
-				printf("Introduce el nombre del fichero de datos:\n");
-				scanf("%s", nombreFichero);
-				strcpy(cargardatos_1_arg.Datos, nombreFichero);
-				cargardatos_1_arg.Ida = idAdministrador;
-				result_3 = cargardatos_1(&cargardatos_1_arg, clnt);
-				break;
-			}
-			case 8:
-			{
-				// Pendiente el listado de libros.
-				break;
-			}
-			}
+				case 8:
+				{
+					// Recogemos del servidor el numero de libros:
+					nlibros_1_arg = idAdministrador; // Le pasamos al servidor el id de administrador.
+					result_9 = nlibros_1(&nlibros_1_arg, clnt);
+					if (result_9 == (int *)NULL)
+					{
+						clnt_perror(clnt, "call failed");
+					}
+					else
+					{
+						NumLibros = *result_9; // Guardamos el resultado en la variable del cliente.
+
+						descargar_1_arg.Ida = idAdministrador; // Le pasamos al servidor nuestro id.
+
+						// Descargamos cada libro del servidor y lo mostramos por pantalla:
+						for (int i = 0; i < NumLibros; i++)
+						{
+							descargar_1_arg.Pos = i;						 // Iteramos usando descargar_1_arg e i.
+							result_11 = descargar_1(&descargar_1_arg, clnt); // Descarga el libro i.
+							if (result_11 == (TLibro *)NULL)
+							{
+								clnt_perror(clnt, "call failed");
+							}
+							else
+							{
+								// Hemos recibido el resultado bien, podemos guardarlo en libro y escribir por pantalla.
+								libro = *result_11;
+								printf("%s\n", libro.Autor);
+								printf("%s\t%s(%s)\t%s\t\n", libro.Titulo, libro.Pais, libro.Idioma, libro.Isbn);
+							}
+						}
+						esperarEntradaPorConsola(); // Esperamos a que el usuario pulse cualquier tecla.
+					}
+					break;
+				}
+				}
+			} while (opcionElegida != 0);
 		}
 		break;
 	}
@@ -181,4 +216,11 @@ int menuAdministracion()
 		scanf("%d", &opcionElegida);
 	} while (opcionElegida < 0 || opcionElegida > 8);
 	return opcionElegida;
+}
+
+void esperarEntradaPorConsola()
+{
+	printf("Introduzca cualquier numero para continuar.....\n");
+	int noImporta = 0;
+	scanf("%d", &noImporta);
 }
