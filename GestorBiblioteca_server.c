@@ -67,6 +67,7 @@ int *cargardatos_1_svc(TConsulta *argp, struct svc_req *rqstp)
 	Cadena nombreFichero = "";
 	const int idAdminCliente = argp->Ida;
 	FILE *ficheroDatos = NULL;
+	TLibro libro = {};
 
 	strcpy(nombreFichero, argp->Datos);
 
@@ -76,14 +77,25 @@ int *cargardatos_1_svc(TConsulta *argp, struct svc_req *rqstp)
 	}
 	else
 	{
-		ficheroDatos = fopen(nombreFichero, "rb");
-		if (ficheroDatos == NULL)
+		ficheroDatos = fopen(nombreFichero, "rb"); // Abrimos el fichero en modo lectura y modo binario.
+		if (ficheroDatos == NULL)				   
 		{
 			result = 0;
 		}
 		else
 		{
-			// El id administrador coincide y además hemos conseguido abrir el fichero:
+			// El id administrador coincide y además hemos conseguido abrir el fichero.
+			fread(&NumLibros, sizeof(NumLibros), 1, ficheroDatos);
+			Biblioteca = (TLibro *)malloc(sizeof(TLibro) * NumLibros); // Reservamos memoria a la Biblioteca, justo la necesaria para cargar exactamente el nº de libros del archivo.
+			if (Biblioteca == NULL)
+			{
+				printf("ERROR: no se ha conseguido reservar memoria dinamica para los libros\n");
+			}
+			else
+			{
+				fread(Biblioteca, sizeof(libro) * NumLibros, NumLibros, ficheroDatos); // Leemos tantos libros como NumLibros diga. Los guardamos en Biblioteca.
+			}
+			fclose(ficheroDatos); // Cerramos el fichero.
 		}
 	}
 

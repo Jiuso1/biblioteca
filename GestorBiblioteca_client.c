@@ -78,7 +78,7 @@ void gestorbiblioteca_1(char *host)
 		{
 			idAdministrador = *result_1; // Guardamos el id generado por el servidor en el cliente administrador.
 			printf("*** Contraseña correcta, puede acceder al menu de Administracion.**\n");
-			printf("Introduzca cualquier caracter para continuar.....\n");
+			printf("Introduzca cualquier numero para continuar.....\n");
 			int noImporta = 0;
 			scanf("%d", &noImporta);
 			opcionElegida = menuAdministracion();
@@ -111,76 +111,16 @@ void gestorbiblioteca_1(char *host)
 				result_3 = cargardatos_1(&cargardatos_1_arg, clnt);
 				break;
 			}
+			case 8:
+			{
+				// Pendiente el listado de libros.
+				break;
+			}
 			}
 		}
 		break;
 	}
 	}
-	/*result_1 = conexion_1(&conexion_1_arg, clnt);
-	if (result_1 == (int *)NULL)
-	{
-		clnt_perror(clnt, "call failed");
-	}
-	result_2 = desconexion_1(&desconexion_1_arg, clnt);
-	if (result_2 == (bool_t *)NULL)
-	{
-		clnt_perror(clnt, "call failed");
-	}
-	result_3 = cargardatos_1(&cargardatos_1_arg, clnt);
-	if (result_3 == (int *)NULL)
-	{
-		clnt_perror(clnt, "call failed");
-	}
-	result_4 = guardardatos_1(&guardardatos_1_arg, clnt);
-	if (result_4 == (bool_t *)NULL)
-	{
-		clnt_perror(clnt, "call failed");
-	}
-	result_5 = nuevolibro_1(&nuevolibro_1_arg, clnt);
-	if (result_5 == (int *)NULL)
-	{
-		clnt_perror(clnt, "call failed");
-	}
-	result_6 = comprar_1(&comprar_1_arg, clnt);
-	if (result_6 == (int *)NULL)
-	{
-		clnt_perror(clnt, "call failed");
-	}
-	result_7 = retirar_1(&retirar_1_arg, clnt);
-	if (result_7 == (int *)NULL)
-	{
-		clnt_perror(clnt, "call failed");
-	}
-	result_8 = ordenar_1(&ordenar_1_arg, clnt);
-	if (result_8 == (bool_t *)NULL)
-	{
-		clnt_perror(clnt, "call failed");
-	}
-	result_9 = nlibros_1(&nlibros_1_arg, clnt);
-	if (result_9 == (int *)NULL)
-	{
-		clnt_perror(clnt, "call failed");
-	}
-	result_10 = buscar_1(&buscar_1_arg, clnt);
-	if (result_10 == (int *)NULL)
-	{
-		clnt_perror(clnt, "call failed");
-	}
-	result_11 = descargar_1(&descargar_1_arg, clnt);
-	if (result_11 == (TLibro *)NULL)
-	{
-		clnt_perror(clnt, "call failed");
-	}
-	result_12 = prestar_1(&prestar_1_arg, clnt);
-	if (result_12 == (int *)NULL)
-	{
-		clnt_perror(clnt, "call failed");
-	}
-	result_13 = devolver_1(&devolver_1_arg, clnt);
-	if (result_13 == (int *)NULL)
-	{
-		clnt_perror(clnt, "call failed");
-	}*/
 #ifndef DEBUG
 	clnt_destroy(clnt);
 #endif /* DEBUG */
