@@ -56,6 +56,13 @@ void gestorbiblioteca_1(char *host)
 	Cadena nombreFichero = "";
 	int NumLibros = 0;
 	TLibro libro = {}; // Los struct se inicializan así.
+	Cadena isbn = "";
+	Cadena autor = "";
+	Cadena titulo = "";
+	int anio = 0;
+	Cadena pais = "";
+	Cadena idioma = "";
+	TNuevo nuevoLibro = {};
 
 	switch (opcionElegida)
 	{
@@ -112,6 +119,40 @@ void gestorbiblioteca_1(char *host)
 					strcpy(cargardatos_1_arg.Datos, nombreFichero);
 					cargardatos_1_arg.Ida = idAdministrador;
 					result_3 = cargardatos_1(&cargardatos_1_arg, clnt);
+					break;
+				}
+				case 3:
+				{
+					// Pedimos los datos del nuevo libro:
+
+					printf("Introduce el Isbn:\n");
+					scanf("%s", isbn);
+					printf("Introduce el Autor:\n");
+					scanf("%s", autor);
+					printf("Introduce el Titulo:\n");
+					scanf("%s", titulo);
+					printf("Introduce el anio:\n");
+					scanf("%d", &anio);
+					printf("Introduce el Pais:\n");
+					scanf("%s", pais);
+					printf("Introduce el Idioma:\n");
+					scanf("%s", idioma);
+
+					//Llenamos la variable libro:
+					strcpy(libro.Isbn, isbn);
+					strcpy(libro.Autor, autor);
+					strcpy(libro.Titulo, titulo);
+					libro.Anio = anio;
+					strcpy(libro.Pais, pais);
+					strcpy(libro.Idioma, idioma);
+
+					//Inicializamos los valores no pedidos por consola:					
+					libro.NoLibros = 0;
+					libro.NoListaEspera = 0;
+					libro.NoPrestados = 0;
+					
+					nuevoLibro.Libro = libro;//Guardamos libro en el campo de nuevoLibro.
+
 					break;
 				}
 				case 8:
