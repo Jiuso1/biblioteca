@@ -125,6 +125,11 @@ void gestorbiblioteca_1(char *host)
 					}
 					else
 					{
+						// Ya formatearemos guay la práctica y le meteremos musiquita, ahora nos debemos centrar en que funcione simplemente.
+						printf("POS\tTITULO\tISBN\tDIS\tPRE\tPOS\n");
+						printf("\tAUTOR\tPAIS (IDIOMA)\tANIO\n");
+						printf("*********************************************************************************************\n");
+
 						NumLibros = *result_9; // Guardamos el resultado en la variable del cliente.
 
 						descargar_1_arg.Ida = idAdministrador; // Le pasamos al servidor nuestro id.
@@ -142,8 +147,8 @@ void gestorbiblioteca_1(char *host)
 							{
 								// Hemos recibido el resultado bien, podemos guardarlo en libro y escribir por pantalla.
 								libro = *result_11;
-								printf("%s\n", libro.Autor);
-								printf("%s\t%s(%s)\t%s\t\n", libro.Titulo, libro.Pais, libro.Idioma, libro.Isbn);
+								printf("%d\t%s\t%s\t%d\t%d\t%d\n", i, libro.Titulo, libro.Isbn, libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
+								printf("%s\t%s(%s)\t%d\n", libro.Autor, libro.Pais, libro.Idioma, libro.Anio);
 							}
 						}
 						esperarEntradaPorConsola(); // Esperamos a que el usuario pulse cualquier tecla.

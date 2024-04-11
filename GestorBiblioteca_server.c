@@ -183,10 +183,9 @@ TLibro *
 descargar_1_svc(TPosicion *argp, struct svc_req *rqstp)
 {
 	static TLibro result;
+	const int i = argp->Pos; // Índice del libro pedido.
 
-	/*
-	 * insert server code here
-	 */
+	result = Biblioteca[i];
 
 	return &result;
 }
