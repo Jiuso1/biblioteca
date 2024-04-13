@@ -84,6 +84,7 @@ int *cargardatos_1_svc(TConsulta *argp, struct svc_req *rqstp)
 		}
 		else
 		{
+			result = 1;
 			// El id administrador coincide y además hemos conseguido abrir el fichero.
 			fread(&NumLibros, sizeof(NumLibros), 1, ficheroDatos);
 			Biblioteca = (TLibro *)malloc(sizeof(TLibro) * NumLibros); // Reservamos memoria a la Biblioteca, justo la necesaria para cargar exactamente el nº de libros del archivo.
@@ -118,9 +119,8 @@ int *nuevolibro_1_svc(TNuevo *argp, struct svc_req *rqstp)
 {
 	static int result;
 
-	/*
-	 * insert server code here
-	 */
+	TNuevo nuevoLibro = *argp; // Copiamos el nuevo libro pasado por argumento a una variable.
+	// Continuaremos esta función cuando tengamos todo el resto de funciones necesarias (buscar por ISBN, ordenar por campo).
 
 	return &result;
 }
@@ -152,9 +152,8 @@ ordenar_1_svc(TOrdenacion *argp, struct svc_req *rqstp)
 {
 	static bool_t result;
 
-	/*
-	 * insert server code here
-	 */
+	TOrdenacion ordenar = *argp;//Copiamos el parámetro a una variable.
+	
 
 	return &result;
 }

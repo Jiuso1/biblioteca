@@ -119,6 +119,23 @@ void gestorbiblioteca_1(char *host)
 					strcpy(cargardatos_1_arg.Datos, nombreFichero);
 					cargardatos_1_arg.Ida = idAdministrador;
 					result_3 = cargardatos_1(&cargardatos_1_arg, clnt);
+					if (result_3 == (int *)NULL)
+					{
+						clnt_perror(clnt, "call failed");
+					}
+					else if (*result_3 == -1)
+					{
+						printf("ERROR: ya hay un administrador logueado\n");
+					}
+					else if (*result_3 == 0)
+					{
+						printf("ERROR: error al cargar los datos\n");
+					}
+					else if (*result_3 == 1)
+					{
+						printf("Datos cargados y ordenados correctamente\n");
+					}
+					esperarEntradaPorConsola(); // Esperamos a que el usuario pulse cualquier tecla.
 					break;
 				}
 				case 3:
@@ -138,7 +155,7 @@ void gestorbiblioteca_1(char *host)
 					printf("Introduce el Idioma:\n");
 					scanf("%s", idioma);
 
-					//Llenamos la variable libro:
+					// Llenamos la variable libro:
 					strcpy(libro.Isbn, isbn);
 					strcpy(libro.Autor, autor);
 					strcpy(libro.Titulo, titulo);
@@ -146,13 +163,30 @@ void gestorbiblioteca_1(char *host)
 					strcpy(libro.Pais, pais);
 					strcpy(libro.Idioma, idioma);
 
-					//Inicializamos los valores no pedidos por consola:					
+					// Inicializamos los valores no pedidos por consola:
 					libro.NoLibros = 0;
 					libro.NoListaEspera = 0;
 					libro.NoPrestados = 0;
-					
-					nuevoLibro.Libro = libro;//Guardamos libro en el campo de nuevoLibro.
 
+					nuevoLibro.Libro = libro;	   // Guardamos libro en el campo de nuevoLibro.
+					nuevolibro_1_arg = nuevoLibro; // Lo pasamos por argumento.
+					result_5 = nuevolibro_1(&nuevolibro_1_arg, clnt);
+					if (result_5 == (int *)NULL)
+					{
+						clnt_perror(clnt, "call failed");
+					}
+					else if (*result_5 == -1)
+					{
+						printf("ERROR: ya hay un administrador logueado\n");
+					}
+					else if (*result_5 == 0)
+					{
+						printf("ERROR: ya hay un libro registrado con el ISBN dado\n");
+					}
+					else if (*result_5 == 1)
+					{
+						printf("Se ha anhadido el nuevo libro correctamente\n");
+					}
 					break;
 				}
 				case 8:
