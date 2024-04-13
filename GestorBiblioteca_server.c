@@ -176,7 +176,6 @@ guardardatos_1_svc(int *argp, struct svc_req *rqstp)
 int *nuevolibro_1_svc(TNuevo *argp, struct svc_req *rqstp)
 {
 	static int result;
-
 	TNuevo nuevoLibro = *argp; // Copiamos el nuevo libro pasado por argumento a una variable.
 	// Continuaremos esta función cuando tengamos todo el resto de funciones necesarias (buscar por ISBN, ordenar por campo).
 
@@ -209,11 +208,10 @@ bool_t *
 ordenar_1_svc(TOrdenacion *argp, struct svc_req *rqstp)
 {
 	static bool_t result;
+	const TOrdenacion ordenar = *argp;		// Copiamos el parámetro a una variable.
+	const int idAdminCliente = ordenar.Ida; // Id pasado por el cliente.
 
-	const TOrdenacion ordenar = *argp;				// Copiamos el parámetro a una variable.
-	const int idAdministradorCliente = ordenar.Ida; // Id pasado por el cliente.
-
-	if (IdAdmin != idAdministradorCliente)
+	if (IdAdmin != idAdminCliente)
 	{
 		result = FALSE; // No hemos podido ordenar al tener un id distinto. Tampoco guardaremos el campo de ordenación.
 	}
@@ -242,9 +240,24 @@ int *buscar_1_svc(TConsulta *argp, struct svc_req *rqstp)
 {
 	static int result;
 
-	/*
-	 * insert server code here
-	 */
+	const TConsulta consulta = *argp; // Copiamos el argumento.
+	const idAdminCliente = consulta.Ida;
+
+	if (IdAdmin != idAdminCliente)
+	{
+		*result = -2;
+	}
+	else
+	{
+		// Usaremos bsearch, que buscará más rápido que cualquier algoritmo que podamos hacer nosotros.
+		// bsearch nos retorna un puntero al elemento buscado. Como queremos la posición del elemento y no un puntero hacia él, haremos una operación para hallar la posición.
+		// Como es bósqueda binaria, debemos ordenar el array previamente. Lo haremos con qsort.
+
+		CampoOrdenacion = 0;												// Ordenamos por Isbn.
+		qsort(Biblioteca, NumLibros, sizeof(struct TLibro), compararCampo); // https://www.geeksforgeeks.org/sort-array-of-structs-with-qsort-in-c/
+
+		// bsearch();
+	}
 
 	return &result;
 }

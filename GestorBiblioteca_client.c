@@ -64,6 +64,8 @@ void gestorbiblioteca_1(char *host)
 	Cadena idioma = "";
 	TNuevo nuevoLibro = {};
 	int campoElegido = 0;
+	Cadena textoABuscar = "";
+	char codigoBusqueda = '\0';
 
 	switch (opcionElegida)
 	{
@@ -223,11 +225,26 @@ void gestorbiblioteca_1(char *host)
 					esperarEntradaPorConsola();
 					break;
 				}
+				case 7:
+				{
+					printf("Introduce el texto a buscar:\n");
+					scanf("%s", textoABuscar);
+					printf("I.- Por Isbn\n");
+					printf("T.- Por Titulo\n");
+					printf("A.- Por Autor\n");
+					printf("P.- Por Pais\n");
+					printf("D.- Por Idioma\n");
+					printf("*.- Por todos los campos\n");
+					printf("Introduce el codigo de busqueda\n");
+					scanf("%c", codigoBusqueda);
+					// Pendiente...
+					break;
+				}
 				case 8:
 				{
 					// Recogemos del servidor el numero de libros:
-					nlibros_1_arg = idAdministrador; // Le pasamos al servidor el id de administrador.
-					result_9 = nlibros_1(&nlibros_1_arg, clnt);
+					nlibros_1_arg = idAdministrador;			// Le pasamos al servidor el id de administrador.
+					result_9 = nlibros_1(&nlibros_1_arg, clnt); // Recogemos el nº de libros del servidor.
 					if (result_9 == (int *)NULL)
 					{
 						clnt_perror(clnt, "call failed");
