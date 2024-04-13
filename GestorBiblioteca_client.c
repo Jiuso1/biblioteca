@@ -63,6 +63,7 @@ void gestorbiblioteca_1(char *host)
 	Cadena pais = "";
 	Cadena idioma = "";
 	TNuevo nuevoLibro = {};
+	int campoElegido = 0;
 
 	switch (opcionElegida)
 	{
@@ -189,6 +190,39 @@ void gestorbiblioteca_1(char *host)
 					}
 					break;
 				}
+				case 6:
+				{
+					printf("0.- Por Isbn\n");
+					printf("1.- Por Titulo\n");
+					printf("2.- Por Autor\n");
+					printf("3.- Por Anho\n");
+					printf("4.- Por Pais\n");
+					printf("5.- Por Idioma\n");
+					printf("6.- Por nº de libros Disponibles\n");
+					printf("7.- Por nº de libros Prestados\n");
+					printf("8.- Por nº de libros en Espera\n");
+					printf("Elige el campo que ordenara los libros:\n");
+					scanf("%d", &campoElegido);
+					// Preparamos el argumento:
+					ordenar_1_arg.Campo = campoElegido;
+					ordenar_1_arg.Ida = idAdministrador;
+					// Llamamos a ordenar en el servidor:
+					result_8 = ordenar_1(&ordenar_1_arg, clnt);
+					if (result_8 == (bool_t *)NULL)
+					{
+						clnt_perror(clnt, "call failed");
+					}
+					else if (*result_8 == FALSE)
+					{
+						printf("ERROR: el id administrador no coincide con el del servidor\n");
+					}
+					else if (*result_8 == TRUE)
+					{
+						printf("Se ha ordenado correctamente el vector\n");
+					}
+					esperarEntradaPorConsola();
+					break;
+				}
 				case 8:
 				{
 					// Recogemos del servidor el numero de libros:
@@ -287,7 +321,6 @@ int menuAdministracion()
 		printf("\t3.- Nuevo libro\n");
 		printf("\t4.- Comprar libros\n");
 		printf("\t5.- Retirar libros\n");
-		printf("\t6.- Ordenar libros\n");
 		printf("\t6.- Ordenar libros\n");
 		printf("\t7.- Buscar libros\n");
 		printf("\t8.- Listar libros\n");

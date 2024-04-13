@@ -5,6 +5,9 @@
  */
 
 #include "GestorBiblioteca.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 // Estructuras de datos para la práctica 1.
 TLibro *Biblioteca = NULL; // Vector dinámico de libros
@@ -18,6 +21,61 @@ Cadena NomFichero = "";
 // Copia del nombre del último fichero binario que se ha cargado en memoria.
 int CampoOrdenacion = 0;
 // Copia del último campo de ordenación realizado.
+
+// Función que ayudará a qsort a comparar por el campo deseado. Mirar man qsort.
+int compararCampo(const void *p1, const void *p2)
+{
+	// En función del campo de ordenación compararemos una cosa u otra.
+	switch (CampoOrdenacion)
+	{
+	case 0:
+	{ // Por Isbn.
+		return strcmp(((struct TLibro *)p1)->Isbn, ((struct TLibro *)p2)->Isbn);
+		break;
+	}
+	case 1:
+	{ // Por título.
+		return strcmp(((struct TLibro *)p1)->Titulo, ((struct TLibro *)p2)->Titulo);
+		break;
+	}
+	case 2:
+	{ // Por autor.
+		return strcmp(((struct TLibro *)p1)->Autor, ((struct TLibro *)p2)->Autor);
+		break;
+	}
+	case 3:
+	{ // Por anho.
+		// Como Anio es entero, se compara devolviendo la resta y no con strcmp.
+		return ((struct TLibro *)p1)->Anio - ((struct TLibro *)p2)->Anio;
+		break;
+	}
+	case 4:
+	{ // Por país.
+		return strcmp(((struct TLibro *)p1)->Pais, ((struct TLibro *)p2)->Pais);
+		break;
+	}
+	case 5:
+	{ // Por idioma.
+		return strcmp(((struct TLibro *)p1)->Idioma, ((struct TLibro *)p2)->Idioma);
+		break;
+	}
+	case 6:
+	{ // Por nº de libros Disponibles.
+		return ((struct TLibro *)p1)->NoLibros - ((struct TLibro *)p2)->NoLibros;
+		break;
+	}
+	case 7:
+	{ // Por nº de libros Prestados.
+		return ((struct TLibro *)p1)->NoPrestados - ((struct TLibro *)p2)->NoPrestados;
+		break;
+	}
+	case 8:
+	{ // Por nº libros en Espera.
+		return ((struct TLibro *)p1)->NoListaEspera - ((struct TLibro *)p2)->NoListaEspera;
+		break;
+	}
+	}
+}
 
 int *conexion_1_svc(int *argp, struct svc_req *rqstp)
 {
@@ -152,8 +210,21 @@ ordenar_1_svc(TOrdenacion *argp, struct svc_req *rqstp)
 {
 	static bool_t result;
 
-	TOrdenacion ordenar = *argp;//Copiamos el parámetro a una variable.
-	
+	const TOrdenacion ordenar = *argp;				// Copiamos el parámetro a una variable.
+	const int idAdministradorCliente = ordenar.Ida; // Id pasado por el cliente.
+
+	if (IdAdmin != idAdministradorCliente)
+	{
+		result = FALSE; // No hemos podido ordenar al tener un id distinto. Tampoco guardaremos el campo de ordenación.
+	}
+	else
+	{
+		result = TRUE;					 // Podemos ordenar.
+		CampoOrdenacion = ordenar.Campo; // Guardamos el campo de ordenación en el servidor.
+		// Procedemos a ordenar el array. Le pasamos el array, el nº de libros, lo que ocupa un libro y cómo compara:
+		qsort(Biblioteca, NumLibros, sizeof(struct TLibro), compararCampo); // https://www.geeksforgeeks.org/sort-array-of-structs-with-qsort-in-c/
+																			// compararCampo ya tiene en cuenta el campo deseado por el que ordenaremos.
+	}
 
 	return &result;
 }
