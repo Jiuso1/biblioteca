@@ -66,6 +66,7 @@ void gestorbiblioteca_1(char *host)
 	int campoElegido = 0;
 	Cadena textoABuscar = "";
 	char codigoBusqueda = '\0';
+	int posicion = 0;
 
 	switch (opcionElegida)
 	{
@@ -236,8 +237,8 @@ void gestorbiblioteca_1(char *host)
 					printf("D.- Por Idioma\n");
 					printf("*.- Por todos los campos\n");
 					printf("Introduce el codigo de busqueda\n");
-					scanf("%c", codigoBusqueda);
-					// Pendiente...
+					scanf(" %c", &codigoBusqueda); // Para que el salto de línea de textoABuscar no nos fastidie, ponemos un espacio.
+
 					break;
 				}
 				case 8:

@@ -239,24 +239,35 @@ int *nlibros_1_svc(int *argp, struct svc_req *rqstp)
 int *buscar_1_svc(TConsulta *argp, struct svc_req *rqstp)
 {
 	static int result;
-
 	const TConsulta consulta = *argp; // Copiamos el argumento.
-	const idAdminCliente = consulta.Ida;
+	const int idAdminCliente = consulta.Ida;
+	TLibro clave = {};		  // Clave que utilizaremos para buscar el ISBN dado.
+	TLibro *resultado = NULL; // Puntero al resultado de la búsqueda.
+	int posicion = 0;
 
 	if (IdAdmin != idAdminCliente)
 	{
-		*result = -2;
+		result = -2;
 	}
 	else
 	{
 		// Usaremos bsearch, que buscará más rápido que cualquier algoritmo que podamos hacer nosotros.
-		// bsearch nos retorna un puntero al elemento buscado. Como queremos la posición del elemento y no un puntero hacia él, haremos una operación para hallar la posición.
-		// Como es bósqueda binaria, debemos ordenar el array previamente. Lo haremos con qsort.
+		// bsearch nos retorna un puntero al elemento buscado.
+		// Como bsearch realiza una búsqueda binaria, debemos ordenar el array previamente. Lo haremos con qsort.
 
-		CampoOrdenacion = 0;												// Ordenamos por Isbn.
-		qsort(Biblioteca, NumLibros, sizeof(struct TLibro), compararCampo); // https://www.geeksforgeeks.org/sort-array-of-structs-with-qsort-in-c/
-
-		// bsearch();
+		CampoOrdenacion = 0;																	  // Ordenamos por Isbn.
+		qsort(Biblioteca, NumLibros, sizeof(struct TLibro), compararCampo);						  // https://www.geeksforgeeks.org/sort-array-of-structs-with-qsort-in-c/
+		strcpy(clave.Isbn, consulta.Datos);														  // La clave a buscar tiene el ISBN dado por el cliente.
+		resultado = bsearch(&clave, Biblioteca, NumLibros, sizeof(struct TLibro), compararCampo); // Mirar man bsearch.
+		if (resultado == NULL)																	  // Si no hay ningún resultado en la búsqueda:
+		{
+			result = -1;
+		}
+		else if (resultado != NULL)
+		{
+			posicion = resultado - Biblioteca; // Si a Biblioteca[i] (que es lo mismo que *(Biblioteca+i)) le restamos Biblioteca, nos queda i. Leer sobre aritmtica de punteros en caso de duda.
+			result = posicion;				   // Devolvemos la posición del elemento buscado.
+		}
 	}
 
 	return &result;
