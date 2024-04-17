@@ -8,6 +8,10 @@
 #include <unistd.h>
 #include <stdio.h>
 
+// Macros que nos ayudarán a poner texto en negrita. Fuente: https://stackoverflow.com/questions/71274207/how-to-bold-text-in-c-program
+#define COLOR_BOLD "\e[1m"
+#define COLOR_OFF "\e[m"
+
 int menuPrincipal();
 int menuAdministracion();
 void esperarEntradaPorConsola();
@@ -139,7 +143,6 @@ void gestorbiblioteca_1(char *host)
 					{
 						printf("Datos cargados y ordenados correctamente\n");
 					}
-					esperarEntradaPorConsola(); // Esperamos a que el usuario pulse cualquier tecla.
 					break;
 				}
 				case 3:
@@ -223,7 +226,6 @@ void gestorbiblioteca_1(char *host)
 					{
 						printf("Se ha ordenado correctamente el vector\n");
 					}
-					esperarEntradaPorConsola();
 					break;
 				}
 				case 7:
@@ -237,8 +239,42 @@ void gestorbiblioteca_1(char *host)
 					printf("D.- Por Idioma\n");
 					printf("*.- Por todos los campos\n");
 					printf("Introduce el codigo de busqueda\n");
-					scanf(" %c", &codigoBusqueda); // Para que el salto de línea de textoABuscar no nos fastidie, ponemos un espacio.
+					scanf(" %c", &codigoBusqueda);				// Para que el salto de línea de textoABuscar no nos fastidie, ponemos un espacio.
+					result_9 = nlibros_1(&nlibros_1_arg, clnt); // Recogemos el nº de libros del servidor.
+					if (result_9 == (int *)NULL)
+					{
+						clnt_perror(clnt, "call failed");
+					}
+					else
+					{
+						// Ya formatearemos guay la práctica y le meteremos musiquita, ahora nos debemos centrar en que funcione simplemente.
+						printf("POS\tTITULO\tISBN\tDIS\tPRE\tPOS\n");
+						printf("\tAUTOR\tPAIS (IDIOMA)\tANIO\n");
+						printf("*********************************************************************************************\n");
 
+						NumLibros = *result_9; // Guardamos el resultado en la variable del cliente.
+
+						descargar_1_arg.Ida = idAdministrador; // Le pasamos al servidor nuestro id.
+
+						// Descargaremos cada libro del servidor. Si pasa el filtrado, lo mostraremos por pantalla:
+						for (int i = 0; i < NumLibros; i++)
+						{
+							descargar_1_arg.Pos = i;						 // Iteramos usando descargar_1_arg e i.
+							result_11 = descargar_1(&descargar_1_arg, clnt); // Descarga el libro i.
+							if (result_11 == (TLibro *)NULL)
+							{
+								clnt_perror(clnt, "call failed");
+							}
+							else
+							{
+								// Hemos recibido el resultado bien, podemos guardarlo en libro y filtrarlo.
+								libro = *result_11;
+								
+								printf("%d\t%s\t%s\t%d\t%d\t%d\n", i, libro.Titulo, libro.Isbn, libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
+								printf("%s\t%s(%s)\t%d\n", libro.Autor, libro.Pais, libro.Idioma, libro.Anio);
+							}
+						}
+					}
 					break;
 				}
 				case 8:
@@ -278,11 +314,11 @@ void gestorbiblioteca_1(char *host)
 								printf("%s\t%s(%s)\t%d\n", libro.Autor, libro.Pais, libro.Idioma, libro.Anio);
 							}
 						}
-						esperarEntradaPorConsola(); // Esperamos a que el usuario pulse cualquier tecla.
 					}
 					break;
 				}
 				}
+				esperarEntradaPorConsola(); // Esperamos a que el usuario pulse cualquier tecla.
 			} while (opcionElegida != 0);
 		}
 		break;

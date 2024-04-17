@@ -276,10 +276,36 @@ int *buscar_1_svc(TConsulta *argp, struct svc_req *rqstp)
 TLibro *
 descargar_1_svc(TPosicion *argp, struct svc_req *rqstp)
 {
-	static TLibro result;
-	const int i = argp->Pos; // Índice del libro pedido.
+	static TLibro result = {};
+	const int i = argp->Pos;			  // Índice del libro pedido.
+	Cadena textoError = "????";			  // Texto asignado a los campos de tipo Cadena cuando se ha producido un error.
+	const int idAdminCliente = argp->Ida; // Id pasado por el cliente.
 
-	result = Biblioteca[i];
+	if (i < 0 || i >= NumLibros)
+	{ // i no puede ser ni negativo ni igual o mayor que NumLibros.
+		result.Anio = 0;
+		result.NoLibros = 0;
+		result.NoListaEspera = 0;
+		result.NoPrestados = 0;
+		strcpy(result.Autor, textoError);
+		strcpy(result.Idioma, textoError);
+		strcpy(result.Isbn, textoError);
+		strcpy(result.Pais, textoError);
+		strcpy(result.Titulo, textoError);
+	}
+	else if (IdAdmin != idAdminCliente)
+	{
+		// El id administrador pasado por el cliente no coincide con el almacenado en el servidor:
+		//  Duda para Don José Manuel.
+		result = Biblioteca[i];
+		result.NoPrestados = 0;
+		result.NoListaEspera = 0;
+	}
+	else
+	{
+		// Todo correcto:
+		result = Biblioteca[i];
+	}
 
 	return &result;
 }
