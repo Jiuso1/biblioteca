@@ -29,7 +29,7 @@ int compararCampo(const void *p1, const void *p2)
 	switch (CampoOrdenacion)
 	{
 	case 0:
-	{ // Por Isbn.
+	{ // Por ISBN.
 		return strcmp(((struct TLibro *)p1)->Isbn, ((struct TLibro *)p2)->Isbn);
 		break;
 	}
@@ -104,7 +104,7 @@ bool_t *
 desconexion_1_svc(int *argp, struct svc_req *rqstp)
 {
 	static bool_t result;
-	int idAdminCliente = *argp;
+	int idAdminCliente = *argp; // Id pasado por el cliente.
 
 	if (IdAdmin != idAdminCliente)
 	{
@@ -123,7 +123,7 @@ int *cargardatos_1_svc(TConsulta *argp, struct svc_req *rqstp)
 {
 	static int result;
 	Cadena nombreFichero = "";
-	const int idAdminCliente = argp->Ida;
+	const int idAdminCliente = argp->Ida; // Id pasado por el cliente.
 	FILE *ficheroDatos = NULL;
 	TLibro libro = {};
 
@@ -177,7 +177,7 @@ int *nuevolibro_1_svc(TNuevo *argp, struct svc_req *rqstp)
 {
 	static int result;
 	TNuevo nuevoLibro = *argp; // Copiamos el nuevo libro pasado por argumento a una variable.
-	// Continuaremos esta función cuando tengamos todo el resto de funciones necesarias (buscar por ISBN, ordenar por campo).
+	// Continuaremos con esta función y con la parte del cliente cuando terminemos "Buscar libros" en cliente.
 
 	return &result;
 }
@@ -239,11 +239,13 @@ int *nlibros_1_svc(int *argp, struct svc_req *rqstp)
 int *buscar_1_svc(TConsulta *argp, struct svc_req *rqstp)
 {
 	static int result;
-	const TConsulta consulta = *argp; // Copiamos el argumento.
-	const int idAdminCliente = consulta.Ida;
-	TLibro clave = {};		  // Clave que utilizaremos para buscar el ISBN dado.
-	TLibro *resultado = NULL; // Puntero al resultado de la búsqueda.
+	const TConsulta consulta = *argp;		 // Copiamos el argumento.
+	const int idAdminCliente = consulta.Ida; // Id pasado por el cliente.
+	TLibro clave = {};						 // Clave que utilizaremos para buscar el ISBN dado.
+	TLibro *resultado = NULL;				 // Puntero al resultado de la búsqueda.
 	int posicion = 0;
+	int i = 0;
+	bool_t encontrado = FALSE; // Vale true cuando se ha encontrado el libro con el ISBN dado.
 
 	if (IdAdmin != idAdminCliente)
 	{
@@ -251,12 +253,12 @@ int *buscar_1_svc(TConsulta *argp, struct svc_req *rqstp)
 	}
 	else
 	{
-		// Usaremos bsearch, que buscará más rápido que cualquier algoritmo que podamos hacer nosotros.
+		// bsearch funciona, pero haremos una búsqueda normal para mantener el orden. bsearch buscará más rápido que cualquier algoritmo que podamos hacer nosotros.
 		// bsearch nos retorna un puntero al elemento buscado.
 		// Como bsearch realiza una búsqueda binaria, debemos ordenar el array previamente. Lo haremos con qsort.
 
-		CampoOrdenacion = 0;																	  // Ordenamos por Isbn.
-		qsort(Biblioteca, NumLibros, sizeof(struct TLibro), compararCampo);						  // https://www.geeksforgeeks.org/sort-array-of-structs-with-qsort-in-c/
+		CampoOrdenacion = 0; // Ordenamos por Isbn.
+		/*qsort(Biblioteca, NumLibros, sizeof(struct TLibro), compararCampo);						  // https://www.geeksforgeeks.org/sort-array-of-structs-with-qsort-in-c/
 		strcpy(clave.Isbn, consulta.Datos);														  // La clave a buscar tiene el ISBN dado por el cliente.
 		resultado = bsearch(&clave, Biblioteca, NumLibros, sizeof(struct TLibro), compararCampo); // Mirar man bsearch.
 		if (resultado == NULL)																	  // Si no hay ningún resultado en la búsqueda:
@@ -267,6 +269,18 @@ int *buscar_1_svc(TConsulta *argp, struct svc_req *rqstp)
 		{
 			posicion = resultado - Biblioteca; // Si a Biblioteca[i] (que es lo mismo que *(Biblioteca+i)) le restamos Biblioteca, nos queda i. Leer sobre aritmtica de punteros en caso de duda.
 			result = posicion;				   // Devolvemos la posición del elemento buscado.
+		}*/
+		while (i < NumLibros && encontrado == FALSE)
+		{
+			if (strcmp(Biblioteca[i].Isbn, consulta.Datos) == 0)
+			{
+				encontrado = TRUE; // Si coincide el ISBN hemos encontrado el libro.
+				result = i;	   // Guardamos la posición del libro.
+			}
+			else
+			{
+				i++;
+			}
 		}
 	}
 
@@ -276,7 +290,8 @@ int *buscar_1_svc(TConsulta *argp, struct svc_req *rqstp)
 TLibro *
 descargar_1_svc(TPosicion *argp, struct svc_req *rqstp)
 {
-	static TLibro result = {};
+	static TLibro result;
+	printf("%s\n", result.Isbn);
 	const int i = argp->Pos;			  // Índice del libro pedido.
 	Cadena textoError = "????";			  // Texto asignado a los campos de tipo Cadena cuando se ha producido un error.
 	const int idAdminCliente = argp->Ida; // Id pasado por el cliente.

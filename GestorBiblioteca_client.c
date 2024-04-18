@@ -71,6 +71,10 @@ void gestorbiblioteca_1(char *host)
 	Cadena textoABuscar = "";
 	char codigoBusqueda = '\0';
 	int posicion = 0;
+	Cadena textoCampo = "";
+	bool_t apareceCadena = FALSE; // Variable que controlará cuándo un libro incluye la cadena buscada.
+	char *punteroBusqueda = NULL; // Fuente: https://stackoverflow.com/questions/22508629/how-to-return-value-using-strstr-function
+	int indiceTextoABuscar = -1;  // Almacena el índice de la subcadena buscada respecto a la cadena.
 
 	switch (opcionElegida)
 	{
@@ -267,11 +271,60 @@ void gestorbiblioteca_1(char *host)
 							}
 							else
 							{
-								// Hemos recibido el resultado bien, podemos guardarlo en libro y filtrarlo.
-								libro = *result_11;
-								
-								printf("%d\t%s\t%s\t%d\t%d\t%d\n", i, libro.Titulo, libro.Isbn, libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
-								printf("%s\t%s(%s)\t%d\n", libro.Autor, libro.Pais, libro.Idioma, libro.Anio);
+								libro = *result_11; // Hemos recibido el resultado bien, podemos guardarlo en libro.
+								// Solo mostraremos el libro si aparece la cadena buscada en los campos deseados.
+
+								// Reseteamos las variables por si acaso:
+								apareceCadena = FALSE;
+								indiceTextoABuscar = -1;
+
+								switch (codigoBusqueda)
+								{
+								case 'I':
+								{ // Por ISBN.
+									punteroBusqueda = strstr(libro.Isbn, textoABuscar);
+									indiceTextoABuscar = punteroBusqueda ? (punteroBusqueda - libro.Isbn) : -1; // Entender la diferencia de punteros y mirar https://stackoverflow.com/questions/22508629/how-to-return-value-using-strstr-function
+									if (indiceTextoABuscar == -1)
+									{
+										apareceCadena = FALSE;
+									}
+									else if (indiceTextoABuscar != -1)
+									{
+										apareceCadena = TRUE;
+									}
+									break;
+								}
+								case 'T':
+								{ // Por título.
+
+									break;
+								}
+								case 'A':
+								{ // Por autor.
+
+									break;
+								}
+								case 'P':
+								{ // Por país.
+
+									break;
+								}
+								case 'D':
+								{ // Por idioma.
+
+									break;
+								}
+								case '*':
+								{ // Por todos los campos.
+
+									break;
+								}
+								}
+								if (apareceCadena)
+								{
+									printf("%d\t%s\t%s\t%d\t%d\t%d\n", i, libro.Titulo, libro.Isbn, libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
+									printf("%s\t%s(%s)\t%d\n", libro.Autor, libro.Pais, libro.Idioma, libro.Anio);
+								}
 							}
 						}
 					}
