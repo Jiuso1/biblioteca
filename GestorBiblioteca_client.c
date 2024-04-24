@@ -72,9 +72,10 @@ void gestorbiblioteca_1(char *host)
 	char codigoBusqueda = '\0';
 	int posicion = 0;
 	Cadena textoCampo = "";
-	bool_t apareceCadena = FALSE; // Variable que controlará cuándo un libro incluye la cadena buscada.
 	char *punteroBusqueda = NULL; // Fuente: https://stackoverflow.com/questions/22508629/how-to-return-value-using-strstr-function
 	int indiceTextoABuscar = -1;  // Almacena el índice de la subcadena buscada respecto a la cadena.
+	char *punteroAlgunaCoincidencia[4] = {};//Array de punteros para la búsqueda en todos los campos (*).
+	int indiceAlgunaCoincidencia[4] = {}; // Array de índices para la búsqueda en todos los campos (*).
 
 	switch (opcionElegida)
 	{
@@ -152,7 +153,6 @@ void gestorbiblioteca_1(char *host)
 				case 3:
 				{
 					// Pedimos los datos del nuevo libro:
-
 					printf("Introduce el Isbn:\n");
 					scanf("%s", isbn);
 					printf("Introduce el Autor:\n");
@@ -243,87 +243,115 @@ void gestorbiblioteca_1(char *host)
 					printf("D.- Por Idioma\n");
 					printf("*.- Por todos los campos\n");
 					printf("Introduce el codigo de busqueda\n");
-					scanf(" %c", &codigoBusqueda);				// Para que el salto de línea de textoABuscar no nos fastidie, ponemos un espacio.
-					result_9 = nlibros_1(&nlibros_1_arg, clnt); // Recogemos el nº de libros del servidor.
-					if (result_9 == (int *)NULL)
+					scanf(" %c", &codigoBusqueda); // Para que el salto de línea de textoABuscar no nos fastidie, ponemos un espacio.
+
+					if (codigoBusqueda == 'I')
 					{
-						clnt_perror(clnt, "call failed");
-					}
-					else
-					{
-						// Ya formatearemos guay la práctica y le meteremos musiquita, ahora nos debemos centrar en que funcione simplemente.
-						printf("POS\tTITULO\tISBN\tDIS\tPRE\tPOS\n");
-						printf("\tAUTOR\tPAIS (IDIOMA)\tANIO\n");
-						printf("*********************************************************************************************\n");
-
-						NumLibros = *result_9; // Guardamos el resultado en la variable del cliente.
-
-						descargar_1_arg.Ida = idAdministrador; // Le pasamos al servidor nuestro id.
-
-						// Descargaremos cada libro del servidor. Si pasa el filtrado, lo mostraremos por pantalla:
-						for (int i = 0; i < NumLibros; i++)
+						// Por ISBN.
+						strcpy(buscar_1_arg.Datos, textoABuscar);
+						buscar_1_arg.Ida = idAdministrador;
+						result_10 = buscar_1(&buscar_1_arg, clnt);
+						if (result_10 == (int *)NULL)
 						{
-							descargar_1_arg.Pos = i;						 // Iteramos usando descargar_1_arg e i.
-							result_11 = descargar_1(&descargar_1_arg, clnt); // Descarga el libro i.
+							clnt_perror(clnt, "call failed");
+						}
+						else if (*result_10 == -1)
+						{
+							printf("ERROR: no se ha encontrado ningun libro\n");
+						}
+						else if (*result_10 == -2)
+						{
+							printf("ERROR: ya hay un administrador logueado\n");
+						}
+						else
+						{
+							// Tenemos la posición del libro buscado en *result_10.
+							descargar_1_arg.Pos = *result_10;				 // Pasamos la posición para descargarlo.
+							result_11 = descargar_1(&descargar_1_arg, clnt); // Descargamos el libro.
+							libro = *result_11;								 // Guardamos el libro en la variable libro.
 							if (result_11 == (TLibro *)NULL)
 							{
 								clnt_perror(clnt, "call failed");
 							}
 							else
 							{
-								libro = *result_11; // Hemos recibido el resultado bien, podemos guardarlo en libro.
-								// Solo mostraremos el libro si aparece la cadena buscada en los campos deseados.
+								printf("%s\t%s\t%d\t%d\t%d\n", libro.Titulo, libro.Isbn, libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
+								printf("%s\t%s(%s)\t%d\n", libro.Autor, libro.Pais, libro.Idioma, libro.Anio);
+							}
+						}
+					}
+					else
+					{
+						// Si no buscamos por ISBN, descargaremos cada libro y filtraremos:
+						result_9 = nlibros_1(&nlibros_1_arg, clnt); // Recogemos el nº de libros del servidor.
+						if (result_9 == (int *)NULL)
+						{
+							clnt_perror(clnt, "call failed");
+						}
+						else
+						{
+							printf("POS\tTITULO\tISBN\tDIS\tPRE\tPOS\n");
+							printf("\tAUTOR\tPAIS (IDIOMA)\tANIO\n");
+							printf("*********************************************************************************************\n");
 
-								// Reseteamos las variables por si acaso:
-								apareceCadena = FALSE;
-								indiceTextoABuscar = -1;
+							NumLibros = *result_9; // Guardamos el resultado en la variable del cliente.
 
-								switch (codigoBusqueda)
+							descargar_1_arg.Ida = idAdministrador; // Le pasamos al servidor nuestro id.
+
+							// Descargaremos cada libro del servidor. Si pasa el filtrado, lo mostraremos por pantalla:
+							for (int i = 0; i < NumLibros; i++)
+							{
+								descargar_1_arg.Pos = i;						 // Iteramos usando descargar_1_arg e i.
+								result_11 = descargar_1(&descargar_1_arg, clnt); // Descarga el libro i.
+								if (result_11 == (TLibro *)NULL)
 								{
-								case 'I':
-								{ // Por ISBN.
-									punteroBusqueda = strstr(libro.Isbn, textoABuscar);
-									indiceTextoABuscar = punteroBusqueda ? (punteroBusqueda - libro.Isbn) : -1; // Entender la diferencia de punteros y mirar https://stackoverflow.com/questions/22508629/how-to-return-value-using-strstr-function
-									if (indiceTextoABuscar == -1)
-									{
-										apareceCadena = FALSE;
-									}
-									else if (indiceTextoABuscar != -1)
-									{
-										apareceCadena = TRUE;
-									}
-									break;
+									clnt_perror(clnt, "call failed");
 								}
-								case 'T':
-								{ // Por título.
-
-									break;
-								}
-								case 'A':
-								{ // Por autor.
-
-									break;
-								}
-								case 'P':
-								{ // Por país.
-
-									break;
-								}
-								case 'D':
-								{ // Por idioma.
-
-									break;
-								}
-								case '*':
-								{ // Por todos los campos.
-
-									break;
-								}
-								}
-								if (apareceCadena)
+								else
 								{
-									printf("%d\t%s\t%s\t%d\t%d\t%d\n", i, libro.Titulo, libro.Isbn, libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
-									printf("%s\t%s(%s)\t%d\n", libro.Autor, libro.Pais, libro.Idioma, libro.Anio);
+									libro = *result_11; // Hemos recibido el resultado bien, podemos guardarlo en libro.
+									// Solo mostraremos el libro si aparece la cadena buscada en los campos deseados.
+
+									indiceTextoABuscar = -1; // Reseteamos la variable por si acaso.
+
+									switch (codigoBusqueda)
+									{
+									case 'T':
+									{ // Por título.
+										punteroBusqueda = strstr(libro.Titulo, textoABuscar);
+										indiceTextoABuscar = punteroBusqueda ? (punteroBusqueda - libro.Titulo) : -1; // Entender la diferencia de punteros y mirar https://stackoverflow.com/questions/22508629/how-to-return-value-using-strstr-function
+										break;
+									}
+									case 'A':
+									{ // Por autor.
+										punteroBusqueda = strstr(libro.Autor, textoABuscar);
+										indiceTextoABuscar = punteroBusqueda ? (punteroBusqueda - libro.Autor) : -1; // Entender la diferencia de punteros y mirar https://stackoverflow.com/questions/22508629/how-to-return-value-using-strstr-function
+										break;
+									}
+									case 'P':
+									{ // Por país.
+										punteroBusqueda = strstr(libro.Pais, textoABuscar);
+										indiceTextoABuscar = punteroBusqueda ? (punteroBusqueda - libro.Pais) : -1; // Entender la diferencia de punteros y mirar https://stackoverflow.com/questions/22508629/how-to-return-value-using-strstr-function
+										break;
+									}
+									case 'D':
+									{ // Por idioma.
+										punteroBusqueda = strstr(libro.Idioma, textoABuscar);
+										indiceTextoABuscar = punteroBusqueda ? (punteroBusqueda - libro.Idioma) : -1; // Entender la diferencia de punteros y mirar https://stackoverflow.com/questions/22508629/how-to-return-value-using-strstr-function
+										break;
+									}
+									case '*':
+									{ // Por todos los campos.
+
+										break;
+									}
+									}
+
+									if (indiceTextoABuscar != -1)
+									{
+										printf("%d\t%s\t%s\t%d\t%d\t%d\n", i, libro.Titulo, libro.Isbn, libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
+										printf("%s\t%s(%s)\t%d\n", libro.Autor, libro.Pais, libro.Idioma, libro.Anio);
+									}
 								}
 							}
 						}

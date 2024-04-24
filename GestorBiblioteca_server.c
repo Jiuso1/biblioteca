@@ -257,8 +257,8 @@ int *buscar_1_svc(TConsulta *argp, struct svc_req *rqstp)
 		// bsearch nos retorna un puntero al elemento buscado.
 		// Como bsearch realiza una búsqueda binaria, debemos ordenar el array previamente. Lo haremos con qsort.
 
-		CampoOrdenacion = 0; // Ordenamos por Isbn.
-		/*qsort(Biblioteca, NumLibros, sizeof(struct TLibro), compararCampo);						  // https://www.geeksforgeeks.org/sort-array-of-structs-with-qsort-in-c/
+		/*CampoOrdenacion = 0; // Ordenamos por Isbn.
+		qsort(Biblioteca, NumLibros, sizeof(struct TLibro), compararCampo);						  // https://www.geeksforgeeks.org/sort-array-of-structs-with-qsort-in-c/
 		strcpy(clave.Isbn, consulta.Datos);														  // La clave a buscar tiene el ISBN dado por el cliente.
 		resultado = bsearch(&clave, Biblioteca, NumLibros, sizeof(struct TLibro), compararCampo); // Mirar man bsearch.
 		if (resultado == NULL)																	  // Si no hay ningún resultado en la búsqueda:
@@ -270,12 +270,13 @@ int *buscar_1_svc(TConsulta *argp, struct svc_req *rqstp)
 			posicion = resultado - Biblioteca; // Si a Biblioteca[i] (que es lo mismo que *(Biblioteca+i)) le restamos Biblioteca, nos queda i. Leer sobre aritmtica de punteros en caso de duda.
 			result = posicion;				   // Devolvemos la posición del elemento buscado.
 		}*/
+		result = -1; // Inicializamos result a -1. Si no se encuentra ningún libro con el ISBN solicitado, result valdrá -1.
 		while (i < NumLibros && encontrado == FALSE)
 		{
 			if (strcmp(Biblioteca[i].Isbn, consulta.Datos) == 0)
 			{
 				encontrado = TRUE; // Si coincide el ISBN hemos encontrado el libro.
-				result = i;	   // Guardamos la posición del libro.
+				result = i;		   // Guardamos la posición del libro.
 			}
 			else
 			{
@@ -291,7 +292,6 @@ TLibro *
 descargar_1_svc(TPosicion *argp, struct svc_req *rqstp)
 {
 	static TLibro result;
-	printf("%s\n", result.Isbn);
 	const int i = argp->Pos;			  // Índice del libro pedido.
 	Cadena textoError = "????";			  // Texto asignado a los campos de tipo Cadena cuando se ha producido un error.
 	const int idAdminCliente = argp->Ida; // Id pasado por el cliente.
@@ -310,8 +310,6 @@ descargar_1_svc(TPosicion *argp, struct svc_req *rqstp)
 	}
 	else if (IdAdmin != idAdminCliente)
 	{
-		// El id administrador pasado por el cliente no coincide con el almacenado en el servidor:
-		//  Duda para Don José Manuel.
 		result = Biblioteca[i];
 		result.NoPrestados = 0;
 		result.NoListaEspera = 0;
