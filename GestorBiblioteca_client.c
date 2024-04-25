@@ -8,9 +8,9 @@
 #include <unistd.h>
 #include <stdio.h>
 
-// Macros que nos ayudarán a poner texto en negrita. Fuente: https://stackoverflow.com/questions/71274207/how-to-bold-text-in-c-program
-#define COLOR_BOLD "\e[1m"
-#define COLOR_OFF "\e[m"
+// Macros para el color verde, usando estilo UNIX:
+#define GREEN_ON "\x1b[32m"
+#define GREEN_OFF "\x1b[0m"
 
 int menuPrincipal();
 int menuAdministracion();
@@ -73,9 +73,7 @@ void gestorbiblioteca_1(char *host)
 	int posicion = 0;
 	Cadena textoCampo = "";
 	char *punteroBusqueda = NULL;			 // Fuente: https://stackoverflow.com/questions/22508629/how-to-return-value-using-strstr-function
-	int indiceTextoABuscar = -1;			 // Almacena el índice de la subcadena buscada respecto a la cadena.
 	char *punteroAlgunaCoincidencia[5] = {}; // Array de punteros para la búsqueda en todos los campos (*).
-	int indiceAlgunaCoincidencia[5] = {};	 // Array de índices para la búsqueda en todos los campos (*).
 
 	switch (opcionElegida)
 	{
@@ -311,68 +309,119 @@ void gestorbiblioteca_1(char *host)
 								{
 									libro = *result_11; // Hemos recibido el resultado bien, podemos guardarlo en libro.
 									// Solo mostraremos el libro si aparece la cadena buscada en los campos deseados.
-
-									indiceTextoABuscar = -1; // Reseteamos la variable por si acaso.
+									// Usaremos strstr, y un array de punteros.
+									// Para la búsqueda monocampo, emplearemos el puntero respectivo: punteroAlgunaCoincidencia[i]. i valdrá lo que diga el mapa: {Isbn:0, Titulo:1, Autor:2, Pais:3, Idioma:4}.
+									// Para la búsqueda multicampo (*), emplearemos todo el array de punteros: punteroAlgunaCoincidencia.
 
 									switch (codigoBusqueda)
 									{
 									case 'T':
-									{ // Por título.
-										punteroBusqueda = strstr(libro.Titulo, textoABuscar);
-										indiceTextoABuscar = punteroBusqueda ? (punteroBusqueda - libro.Titulo) : -1; // Entender la diferencia de punteros y mirar https://stackoverflow.com/questions/22508629/how-to-return-value-using-strstr-function
+									{																	   // Por título.
+										punteroAlgunaCoincidencia[1] = strstr(libro.Titulo, textoABuscar); // Titulo:1.
+										// Inicializo el resto de punteros a NULL:
+										punteroAlgunaCoincidencia[0] = NULL;
+										punteroAlgunaCoincidencia[2] = NULL;
+										punteroAlgunaCoincidencia[3] = NULL;
+										punteroAlgunaCoincidencia[4] = NULL;
 										break;
 									}
 									case 'A':
-									{ // Por autor.
-										punteroBusqueda = strstr(libro.Autor, textoABuscar);
-										indiceTextoABuscar = punteroBusqueda ? (punteroBusqueda - libro.Autor) : -1; // Entender la diferencia de punteros y mirar https://stackoverflow.com/questions/22508629/how-to-return-value-using-strstr-function
+									{																	  // Por autor.
+										punteroAlgunaCoincidencia[2] = strstr(libro.Autor, textoABuscar); // Autor:2.
+										// Inicializo el resto de punteros a NULL:
+										punteroAlgunaCoincidencia[0] = NULL;
+										punteroAlgunaCoincidencia[1] = NULL;
+										punteroAlgunaCoincidencia[3] = NULL;
+										punteroAlgunaCoincidencia[4] = NULL;
 										break;
 									}
 									case 'P':
-									{ // Por país.
-										punteroBusqueda = strstr(libro.Pais, textoABuscar);
-										indiceTextoABuscar = punteroBusqueda ? (punteroBusqueda - libro.Pais) : -1; // Entender la diferencia de punteros y mirar https://stackoverflow.com/questions/22508629/how-to-return-value-using-strstr-function
+									{																	 // Por país.
+										punteroAlgunaCoincidencia[3] = strstr(libro.Pais, textoABuscar); // Pais:3.
+										// Inicializo el resto de punteros a NULL:
+										punteroAlgunaCoincidencia[0] = NULL;
+										punteroAlgunaCoincidencia[1] = NULL;
+										punteroAlgunaCoincidencia[2] = NULL;
+										punteroAlgunaCoincidencia[4] = NULL;
 										break;
 									}
 									case 'D':
-									{ // Por idioma.
-										punteroBusqueda = strstr(libro.Idioma, textoABuscar);
-										indiceTextoABuscar = punteroBusqueda ? (punteroBusqueda - libro.Idioma) : -1; // Entender la diferencia de punteros y mirar https://stackoverflow.com/questions/22508629/how-to-return-value-using-strstr-function
+									{																	   // Por idioma.
+										punteroAlgunaCoincidencia[4] = strstr(libro.Idioma, textoABuscar); // Idioma:4.
+										// Inicializo el resto de punteros a NULL:
+										punteroAlgunaCoincidencia[0] = NULL;
+										punteroAlgunaCoincidencia[1] = NULL;
+										punteroAlgunaCoincidencia[2] = NULL;
+										punteroAlgunaCoincidencia[3] = NULL;
 										break;
 									}
 									case '*':
-									{							 // Por todos los campos.
-										indiceTextoABuscar = -1; // Reseteamos la variable.
-
-										// Al final lo voy a dejar así, todo sea por dejarlo subrayado y bonito.
-
+									{ // Por todos los campos.
 										punteroAlgunaCoincidencia[0] = strstr(libro.Isbn, textoABuscar);
-										indiceAlgunaCoincidencia[0] = punteroAlgunaCoincidencia[0] ? (punteroAlgunaCoincidencia[0] - libro.Isbn) : -1;
 										punteroAlgunaCoincidencia[1] = strstr(libro.Titulo, textoABuscar);
-										indiceAlgunaCoincidencia[1] = punteroAlgunaCoincidencia[1] ? (punteroAlgunaCoincidencia[1] - libro.Titulo) : -1;
 										punteroAlgunaCoincidencia[2] = strstr(libro.Autor, textoABuscar);
-										indiceAlgunaCoincidencia[2] = punteroAlgunaCoincidencia[2] ? (punteroAlgunaCoincidencia[2] - libro.Autor) : -1;
 										punteroAlgunaCoincidencia[3] = strstr(libro.Pais, textoABuscar);
-										indiceAlgunaCoincidencia[3] = punteroAlgunaCoincidencia[3] ? (punteroAlgunaCoincidencia[3] - libro.Pais) : -1;
 										punteroAlgunaCoincidencia[4] = strstr(libro.Idioma, textoABuscar);
-										indiceAlgunaCoincidencia[4] = punteroAlgunaCoincidencia[4] ? (punteroAlgunaCoincidencia[4] - libro.Idioma) : -1;
-
-										// Buscamos alguna coincidencia:
-										for (int j = 0; j < 5; j++)
-										{
-											if (indiceAlgunaCoincidencia[j] != -1)
-											{
-												indiceTextoABuscar = 0; // Ponemos un valor distinto a -1 para que posteriormente se escriba por pantalla este libro.
-											}
-										}
 										break;
 									}
 									}
 
-									if (indiceTextoABuscar != -1)
+									if (punteroAlgunaCoincidencia[0] != NULL || punteroAlgunaCoincidencia[1] != NULL || punteroAlgunaCoincidencia[2] != NULL || punteroAlgunaCoincidencia[3] != NULL || punteroAlgunaCoincidencia[4] != NULL)
 									{
-										printf("%d\t%s\t%s\t%d\t%d\t%d\n", i, libro.Titulo, libro.Isbn, libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
-										printf("%s\t%s(%s)\t%d\n", libro.Autor, libro.Pais, libro.Idioma, libro.Anio);
+										/*printf("%d\t%s\t%s\t%d\t%d\t%d\n", i, libro.Titulo, libro.Isbn, libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
+										printf("%s\t%s(%s)\t%d\n", libro.Autor, libro.Pais, libro.Idioma, libro.Anio);*/
+										printf("%d\t", i);
+
+										if (punteroAlgunaCoincidencia[1] != NULL)
+										{ // Si coincide el titulo (Titulo:1), lo coloreo:
+											printf(GREEN_ON "%s" GREEN_OFF "\t", libro.Titulo);
+										}
+										else
+										{ // Si no hay coincidencia simplemente lo escribo:
+											printf("%s\t", libro.Titulo);
+										}
+
+										if (punteroAlgunaCoincidencia[0])
+										{ // Si coincide el (Isbn:0), lo coloreo:
+											printf(GREEN_ON "%s"
+															"\t" GREEN_OFF,
+												   libro.Isbn);
+										}
+										else
+										{ // Si no hay coincidencia simplemente lo escribo:
+											printf("%s\t", libro.Isbn);
+										}
+
+										printf("%d\t%d\t%d\n", libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
+
+										if (punteroAlgunaCoincidencia[2] != NULL)
+										{ // Si coincide el autor (Autor:2), lo coloreo:
+											printf(GREEN_ON "%s" GREEN_OFF "\t", libro.Autor);
+										}
+										else
+										{ // Si no hay coincidencia simplemente lo escribo:
+											printf("%s\t", libro.Autor);
+										}
+
+										if (punteroAlgunaCoincidencia[3] != NULL)
+										{ // Si coincide el pais (Pais:3), lo coloreo:
+											printf(GREEN_ON "%s" GREEN_OFF "(", libro.Pais);
+										}
+										else
+										{ // Si no hay coincidencia simplemente lo escribo:
+											printf("%s(", libro.Pais);
+										}
+
+										if (punteroAlgunaCoincidencia[4] != NULL)
+										{ // Si coincide el idioma (Idioma:4), lo coloreo:
+											printf(GREEN_ON "%s" GREEN_OFF ")\t", libro.Idioma);
+										}
+										else
+										{ // Si no hay coincidencia simplemente lo escribo:
+											printf("%s)\t", libro.Idioma);
+										}
+
+										printf("%d\n", libro.Anio);
 									}
 								}
 							}
