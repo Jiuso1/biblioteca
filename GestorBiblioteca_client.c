@@ -72,10 +72,10 @@ void gestorbiblioteca_1(char *host)
 	char codigoBusqueda = '\0';
 	int posicion = 0;
 	Cadena textoCampo = "";
-	char *punteroBusqueda = NULL; // Fuente: https://stackoverflow.com/questions/22508629/how-to-return-value-using-strstr-function
-	int indiceTextoABuscar = -1;  // Almacena el índice de la subcadena buscada respecto a la cadena.
-	char *punteroAlgunaCoincidencia[4] = {};//Array de punteros para la búsqueda en todos los campos (*).
-	int indiceAlgunaCoincidencia[4] = {}; // Array de índices para la búsqueda en todos los campos (*).
+	char *punteroBusqueda = NULL;			 // Fuente: https://stackoverflow.com/questions/22508629/how-to-return-value-using-strstr-function
+	int indiceTextoABuscar = -1;			 // Almacena el índice de la subcadena buscada respecto a la cadena.
+	char *punteroAlgunaCoincidencia[5] = {}; // Array de punteros para la búsqueda en todos los campos (*).
+	int indiceAlgunaCoincidencia[5] = {};	 // Array de índices para la búsqueda en todos los campos (*).
 
 	switch (opcionElegida)
 	{
@@ -341,8 +341,30 @@ void gestorbiblioteca_1(char *host)
 										break;
 									}
 									case '*':
-									{ // Por todos los campos.
+									{							 // Por todos los campos.
+										indiceTextoABuscar = -1; // Reseteamos la variable.
 
+										// Al final lo voy a dejar así, todo sea por dejarlo subrayado y bonito.
+
+										punteroAlgunaCoincidencia[0] = strstr(libro.Isbn, textoABuscar);
+										indiceAlgunaCoincidencia[0] = punteroAlgunaCoincidencia[0] ? (punteroAlgunaCoincidencia[0] - libro.Isbn) : -1;
+										punteroAlgunaCoincidencia[1] = strstr(libro.Titulo, textoABuscar);
+										indiceAlgunaCoincidencia[1] = punteroAlgunaCoincidencia[1] ? (punteroAlgunaCoincidencia[1] - libro.Titulo) : -1;
+										punteroAlgunaCoincidencia[2] = strstr(libro.Autor, textoABuscar);
+										indiceAlgunaCoincidencia[2] = punteroAlgunaCoincidencia[2] ? (punteroAlgunaCoincidencia[2] - libro.Autor) : -1;
+										punteroAlgunaCoincidencia[3] = strstr(libro.Pais, textoABuscar);
+										indiceAlgunaCoincidencia[3] = punteroAlgunaCoincidencia[3] ? (punteroAlgunaCoincidencia[3] - libro.Pais) : -1;
+										punteroAlgunaCoincidencia[4] = strstr(libro.Idioma, textoABuscar);
+										indiceAlgunaCoincidencia[4] = punteroAlgunaCoincidencia[4] ? (punteroAlgunaCoincidencia[4] - libro.Idioma) : -1;
+
+										// Buscamos alguna coincidencia:
+										for (int j = 0; j < 5; j++)
+										{
+											if (indiceAlgunaCoincidencia[j] != -1)
+											{
+												indiceTextoABuscar = 0; // Ponemos un valor distinto a -1 para que posteriormente se escriba por pantalla este libro.
+											}
+										}
 										break;
 									}
 									}
