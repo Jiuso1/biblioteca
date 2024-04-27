@@ -122,12 +122,11 @@ desconexion_1_svc(int *argp, struct svc_req *rqstp)
 int *cargardatos_1_svc(TConsulta *argp, struct svc_req *rqstp)
 {
 	static int result;
-	Cadena nombreFichero = "";
 	const int idAdminCliente = argp->Ida; // Id pasado por el cliente.
 	FILE *ficheroDatos = NULL;
 	TLibro libro = {};
 
-	strcpy(nombreFichero, argp->Datos);
+	strcpy(NomFichero, argp->Datos);
 
 	if (IdAdmin != idAdminCliente)
 	{
@@ -135,7 +134,7 @@ int *cargardatos_1_svc(TConsulta *argp, struct svc_req *rqstp)
 	}
 	else
 	{
-		ficheroDatos = fopen(nombreFichero, "rb"); // Abrimos el fichero en modo lectura y modo binario.
+		ficheroDatos = fopen(NomFichero, "rb"); // Abrimos el fichero en modo lectura y modo binario.
 		if (ficheroDatos == NULL)
 		{
 			result = 0;
@@ -165,20 +164,69 @@ bool_t *
 guardardatos_1_svc(int *argp, struct svc_req *rqstp)
 {
 	static bool_t result;
+	const int idAdminCliente = *argp; // Id pasado por el cliente.
+	FILE *ficheroDatos = NULL;
 
-	/*
-	 * insert server code here
-	 */
+	if (IdAdmin != idAdminCliente)
+	{
+		result = FALSE;
+	}
+	else
+	{
+		ficheroDatos = fopen(NomFichero, "wb"); // Abrimos el fichero en modo escritura y modo binario.
+		if (ficheroDatos == NULL)
+		{
+			result = FALSE;
+		}
+		else
+		{
+			if (Biblioteca == NULL || NumLibros <= 0)
+			{
+				result = FALSE;
+			}
+			else
+			{
+				result = TRUE;															 // Podemos salvar la información.
+				fwrite(&NumLibros, sizeof(NumLibros), 1, ficheroDatos);					 // Escribimos el número de libros.
+				fwrite(Biblioteca, sizeof(TLibro) * NumLibros, NumLibros, ficheroDatos); // Escribimos tantos libros como NumLibros diga. Los guardamos en Biblioteca.
+			}
+			fclose(ficheroDatos);
+		}
+	}
 
 	return &result;
 }
 
 int *nuevolibro_1_svc(TNuevo *argp, struct svc_req *rqstp)
-{
+{ // Pendiente mejorar y revisar.
 	static int result;
-	TNuevo nuevoLibro = *argp; // Copiamos el nuevo libro pasado por argumento a una variable.
-	// Continuaremos con esta función y con la parte del cliente cuando terminemos "Buscar libros" en cliente.
-
+	if (argp->Ida != IdAdmin)
+		result = -1;
+	else
+	{
+		TLibro nuevoLibro = argp->Libro; // Copiamos el nuevo libro pasado por argumento a una variable.
+		bool_t encontrado = FALSE;
+		int i = 0;
+		while (i < NumLibros && encontrado == FALSE) // Buscamos si hay un libro que ya tenga el mismo ISBN
+		{
+			if (strcmp(Biblioteca[i].Isbn, nuevoLibro.Isbn) == 0)
+			{
+				encontrado = TRUE;
+				result = 0;
+			}
+			i++;
+		}
+		if (encontrado == FALSE) // No hay ningun libro con el mismo ISBN, lo metemos en el array
+		{
+			NumLibros = NumLibros + 1;
+			TLibro *nuevoVector = malloc(NumLibros * sizeof(TLibro));
+			memcpy(nuevoVector, Biblioteca, (NumLibros - 1) * sizeof(TLibro));
+			nuevoVector[NumLibros - 1] = nuevoLibro;
+			free(Biblioteca); // Para evitar memory leak
+			Biblioteca = nuevoVector;
+			result = 1;
+		}
+	}
 	return &result;
 }
 

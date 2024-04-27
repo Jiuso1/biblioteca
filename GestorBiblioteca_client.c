@@ -74,6 +74,8 @@ void gestorbiblioteca_1(char *host)
 	Cadena textoCampo = "";
 	char *punteroBusqueda = NULL;			 // Fuente: https://stackoverflow.com/questions/22508629/how-to-return-value-using-strstr-function
 	char *punteroAlgunaCoincidencia[5] = {}; // Array de punteros para la búsqueda en todos los campos (*).
+	Cadena isbnCompra = "";
+	char confirmacionCompra = '\0';
 
 	switch (opcionElegida)
 	{
@@ -148,6 +150,25 @@ void gestorbiblioteca_1(char *host)
 					}
 					break;
 				}
+				case 2:
+				{
+					// Guardamos los datos de la biblioteca en el fichero.
+					guardardatos_1_arg = idAdministrador; // Le pasamos el id del administrador.
+					result_4 = guardardatos_1(&guardardatos_1_arg, clnt);
+					if (result_4 == (bool_t *)NULL)
+					{
+						clnt_perror(clnt, "call failed");
+					}
+					else if (*result_4 == FALSE)
+					{
+						printf("ERROR: no se ha podido la informacion en el fichero\n");
+					}
+					else
+					{
+						printf("Informacion salvada en el fichero correctamente\n");
+					}
+					break;
+				}
 				case 3:
 				{
 					// Pedimos los datos del nuevo libro:
@@ -177,8 +198,9 @@ void gestorbiblioteca_1(char *host)
 					libro.NoListaEspera = 0;
 					libro.NoPrestados = 0;
 
-					nuevoLibro.Libro = libro;	   // Guardamos libro en el campo de nuevoLibro.
-					nuevolibro_1_arg = nuevoLibro; // Lo pasamos por argumento.
+					nuevoLibro.Libro = libro;		  // Guardamos libro en el campo de nuevoLibro.
+					nuevoLibro.Ida = idAdministrador; // Guardamos el id administrador en el campo de nuevoLibro.
+					nuevolibro_1_arg = nuevoLibro;	  // Lo pasamos por argumento.
 					result_5 = nuevolibro_1(&nuevolibro_1_arg, clnt);
 					if (result_5 == (int *)NULL)
 					{
@@ -195,6 +217,54 @@ void gestorbiblioteca_1(char *host)
 					else if (*result_5 == 1)
 					{
 						printf("Se ha anhadido el nuevo libro correctamente\n");
+					}
+					break;
+				}
+				case 4:
+				{
+					printf("Introduce Isbn a Buscar:\n");
+					scanf("%s", isbnCompra);
+					// Por ISBN.
+					strcpy(buscar_1_arg.Datos, isbnCompra);
+					buscar_1_arg.Ida = idAdministrador;
+					result_10 = buscar_1(&buscar_1_arg, clnt);
+					if (result_10 == (int *)NULL)
+					{
+						clnt_perror(clnt, "call failed");
+					}
+					else if (*result_10 == -1)
+					{
+						printf("ERROR: no se ha encontrado ningun libro\n");
+					}
+					else if (*result_10 == -2)
+					{
+						printf("ERROR: ya hay un administrador logueado\n");
+					}
+					else
+					{
+						// Tenemos la posición del libro buscado en *result_10.
+						descargar_1_arg.Pos = *result_10;				 // Pasamos la posición para descargarlo.
+						result_11 = descargar_1(&descargar_1_arg, clnt); // Descargamos el libro.
+						libro = *result_11;								 // Guardamos el libro en la variable libro.
+						if (result_11 == (TLibro *)NULL)
+						{
+							clnt_perror(clnt, "call failed");
+						}
+						else
+						{
+							printf("%s\t%s\t%d\t%d\t%d\n", libro.Titulo, libro.Isbn, libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
+							printf("%s\t%s(%s)\t%d\n", libro.Autor, libro.Pais, libro.Idioma, libro.Anio);
+							printf("¿ Es este el libro al que desea comprar más unidades (s/n) ?\n");
+							scanf("%c", &confirmacionCompra);
+							if (confirmacionCompra != 's')
+							{//Si el usuario no ha confirmado con s:
+								printf("*** Compra abortada ***\n");
+							}
+							else
+							{//Si el usuario ha confirmado con s:
+								
+							}
+						}
 					}
 					break;
 				}
