@@ -152,6 +152,7 @@ int *cargardatos_1_svc(TConsulta *argp, struct svc_req *rqstp)
 			else
 			{
 				fread(Biblioteca, sizeof(libro) * NumLibros, NumLibros, ficheroDatos); // Leemos tantos libros como NumLibros diga. Los guardamos en Biblioteca.
+				qsort(Biblioteca, NumLibros, sizeof(struct TLibro), compararCampo);	   // https://www.geeksforgeeks.org/sort-array-of-structs-with-qsort-in-c/
 			}
 			fclose(ficheroDatos); // Cerramos el fichero.
 		}
@@ -233,10 +234,51 @@ int *nuevolibro_1_svc(TNuevo *argp, struct svc_req *rqstp)
 int *comprar_1_svc(TComRet *argp, struct svc_req *rqstp)
 {
 	static int result;
+	const TComRet consulta = *argp;			 // Copiamos el argumento.
+	const int idAdminCliente = consulta.Ida; // Id pasado por el cliente.
+	TLibro clave = {};						 // Clave que utilizaremos para buscar el ISBN dado.
+	TLibro *resultado = NULL;				 // Puntero al resultado de la búsqueda.
+	int i = 0;
+	bool_t encontrado = FALSE; // Vale true cuando se ha encontrado el libro con el ISBN dado.
 
-	/*
-	 * insert server code here
-	 */
+	if (IdAdmin != idAdminCliente)
+	{
+		result = -1;
+	}
+	else
+	{
+		while (i < NumLibros && encontrado == FALSE)
+		{
+			if (strcmp(Biblioteca[i].Isbn, consulta.Isbn) == 0)
+			{
+				encontrado = TRUE; // Si coincide el ISBN hemos encontrado el libro.
+			}
+			else
+			{
+				i++;
+			}
+		}
+		if (!encontrado)
+		{
+			result = 0;
+		}
+		else
+		{
+			result = 1;
+			Biblioteca[i].NoLibros += consulta.NoLibros; // Aumentamos el número de libros disponbles.
+			if (Biblioteca[i].NoLibros > Biblioteca[i].NoListaEspera)
+			{														   // Si hay más libros disponibles que gente esperando:
+				Biblioteca[i].NoLibros -= Biblioteca[i].NoListaEspera; // El sistema les entrega los libros para que dejen de esperar.
+				Biblioteca[i].NoListaEspera = 0;					   // Ya no hay nadie esperando.
+			}
+			else if (Biblioteca[i].NoLibros < Biblioteca[i].NoListaEspera)
+			{														   // Si hay menos libros disponibles que gente esperando:
+				Biblioteca[i].NoListaEspera -= Biblioteca[i].NoLibros; // Reducimos el número de personas esperando en la misma cantidad que el número de libros disponible.
+				Biblioteca[i].NoLibros = 0;							   // Ya hemos dado todos los libros, no nos quedan.
+			}
+			qsort(Biblioteca, NumLibros, sizeof(struct TLibro), compararCampo); // https://www.geeksforgeeks.org/sort-array-of-structs-with-qsort-in-c/
+		}
+	}
 
 	return &result;
 }
@@ -244,10 +286,49 @@ int *comprar_1_svc(TComRet *argp, struct svc_req *rqstp)
 int *retirar_1_svc(TComRet *argp, struct svc_req *rqstp)
 {
 	static int result;
+	TComRet consulta = *argp;				 // Copiamos el argumento.
+	const int idAdminCliente = consulta.Ida; // Id pasado por el cliente.
+	int i = 0;								 // Iterador para el bucle while.
+	bool_t encontrado = FALSE;				 // Vale true cuando se ha encontrado el libro con el ISBN dado.
+	TLibro libro = {};						 // Libro buscado.
 
-	/*
-	 * insert server code here
-	 */
+	if (IdAdmin != idAdminCliente)
+	{
+		result = -1;
+	}
+	else
+	{
+		while (i < NumLibros && encontrado == FALSE)
+		{
+			if (strcmp(Biblioteca[i].Isbn, consulta.Isbn) == 0)
+			{
+				encontrado = TRUE; // Si coincide el ISBN hemos encontrado el libro.
+			}
+			else
+			{
+				i++;
+			}
+		}
+		if (!encontrado)
+		{
+			result = 0;
+		}
+		else
+		{
+			libro = Biblioteca[i]; // Si lo hemos encontrado guardamos el libro buscado en la variable.
+			if (consulta.NoLibros > libro.NoLibros)
+			{
+				result = 2; // Si la cantidad a retirar es mayor que la que hay, no hay suficientes ejemplares para ser retirados.
+			}
+			else
+			{
+				result = 1;
+				libro.NoLibros -= consulta.NoLibros;								// Si no, retiramos los libros.
+				Biblioteca[i] = libro;												// Actualizamos el libro en la biblioteca.
+				qsort(Biblioteca, NumLibros, sizeof(struct TLibro), compararCampo); // https://www.geeksforgeeks.org/sort-array-of-structs-with-qsort-in-c/
+			}
+		}
+	}
 
 	return &result;
 }
@@ -291,7 +372,6 @@ int *buscar_1_svc(TConsulta *argp, struct svc_req *rqstp)
 	const int idAdminCliente = consulta.Ida; // Id pasado por el cliente.
 	TLibro clave = {};						 // Clave que utilizaremos para buscar el ISBN dado.
 	TLibro *resultado = NULL;				 // Puntero al resultado de la búsqueda.
-	int posicion = 0;
 	int i = 0;
 	bool_t encontrado = FALSE; // Vale true cuando se ha encontrado el libro con el ISBN dado.
 
@@ -301,23 +381,6 @@ int *buscar_1_svc(TConsulta *argp, struct svc_req *rqstp)
 	}
 	else
 	{
-		// bsearch funciona, pero haremos una búsqueda normal para mantener el orden. bsearch buscará más rápido que cualquier algoritmo que podamos hacer nosotros.
-		// bsearch nos retorna un puntero al elemento buscado.
-		// Como bsearch realiza una búsqueda binaria, debemos ordenar el array previamente. Lo haremos con qsort.
-
-		/*CampoOrdenacion = 0; // Ordenamos por Isbn.
-		qsort(Biblioteca, NumLibros, sizeof(struct TLibro), compararCampo);						  // https://www.geeksforgeeks.org/sort-array-of-structs-with-qsort-in-c/
-		strcpy(clave.Isbn, consulta.Datos);														  // La clave a buscar tiene el ISBN dado por el cliente.
-		resultado = bsearch(&clave, Biblioteca, NumLibros, sizeof(struct TLibro), compararCampo); // Mirar man bsearch.
-		if (resultado == NULL)																	  // Si no hay ningún resultado en la búsqueda:
-		{
-			result = -1;
-		}
-		else if (resultado != NULL)
-		{
-			posicion = resultado - Biblioteca; // Si a Biblioteca[i] (que es lo mismo que *(Biblioteca+i)) le restamos Biblioteca, nos queda i. Leer sobre aritmtica de punteros en caso de duda.
-			result = posicion;				   // Devolvemos la posición del elemento buscado.
-		}*/
 		result = -1; // Inicializamos result a -1. Si no se encuentra ningún libro con el ISBN solicitado, result valdrá -1.
 		while (i < NumLibros && encontrado == FALSE)
 		{

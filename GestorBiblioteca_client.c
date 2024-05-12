@@ -76,6 +76,8 @@ void gestorbiblioteca_1(char *host)
 	char *punteroAlgunaCoincidencia[5] = {}; // Array de punteros para la búsqueda en todos los campos (*).
 	Cadena isbnCompra = "";
 	char confirmacionCompra = '\0';
+	int numeroLibrosComprados = 0;
+	int numeroLibrosRetirados = 0;
 
 	switch (opcionElegida)
 	{
@@ -255,14 +257,110 @@ void gestorbiblioteca_1(char *host)
 							printf("%s\t%s\t%d\t%d\t%d\n", libro.Titulo, libro.Isbn, libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
 							printf("%s\t%s(%s)\t%d\n", libro.Autor, libro.Pais, libro.Idioma, libro.Anio);
 							printf("¿ Es este el libro al que desea comprar más unidades (s/n) ?\n");
-							scanf("%c", &confirmacionCompra);
+							scanf(" %c", &confirmacionCompra);
 							if (confirmacionCompra != 's')
-							{//Si el usuario no ha confirmado con s:
+							{ // Si el usuario no ha confirmado con s:
 								printf("*** Compra abortada ***\n");
 							}
 							else
-							{//Si el usuario ha confirmado con s:
-								
+							{ // Si el usuario ha confirmado con s:
+								printf("Introduce Numero de Libros comprados:\n");
+								scanf("%d", &numeroLibrosComprados);
+								// Pasamos los parámetros:
+								comprar_1_arg.Ida = idAdministrador;
+								strcpy(comprar_1_arg.Isbn, isbnCompra);
+								comprar_1_arg.NoLibros = numeroLibrosComprados;
+								result_6 = comprar_1(&comprar_1_arg, clnt);
+								if (result_6 == (int *)NULL)
+								{
+									clnt_perror(clnt, "call failed");
+								}
+								else if (*result_6 == -1)
+								{
+									printf("ERROR: ya hay un administrador logueado\n");
+								}
+								else if (*result_6 == 0)
+								{
+									printf("ERROR: no se ha encontrado el libro\n");
+								}
+								else if (*result_6 == 1)
+								{
+									printf("*** Se han agregado los nuevos ejemplares del libro y los datos están ordenados ***\n");
+								}
+							}
+						}
+					}
+					break;
+				}
+				case 5:
+				{
+					printf("Introduce Isbn a Buscar:\n");
+					scanf("%s", isbnCompra);
+					// Por ISBN.
+					strcpy(buscar_1_arg.Datos, isbnCompra);
+					buscar_1_arg.Ida = idAdministrador;
+					result_10 = buscar_1(&buscar_1_arg, clnt);
+					if (result_10 == (int *)NULL)
+					{
+						clnt_perror(clnt, "call failed");
+					}
+					else if (*result_10 == -1)
+					{
+						printf("ERROR: no se ha encontrado ningun libro\n");
+					}
+					else if (*result_10 == -2)
+					{
+						printf("ERROR: ya hay un administrador logueado\n");
+					}
+					else
+					{
+						// Tenemos la posición del libro buscado en *result_10.
+						descargar_1_arg.Pos = *result_10;				 // Pasamos la posición para descargarlo.
+						result_11 = descargar_1(&descargar_1_arg, clnt); // Descargamos el libro.
+						libro = *result_11;								 // Guardamos el libro en la variable libro.
+						if (result_11 == (TLibro *)NULL)
+						{
+							clnt_perror(clnt, "call failed");
+						}
+						else
+						{
+							printf("%s\t%s\t%d\t%d\t%d\n", libro.Titulo, libro.Isbn, libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
+							printf("%s\t%s(%s)\t%d\n", libro.Autor, libro.Pais, libro.Idioma, libro.Anio);
+							printf("¿ Es este el libro al que desea retirar unidades (s/n) ?\n");
+							scanf(" %c", &confirmacionCompra);
+							if (confirmacionCompra != 's')
+							{ // Si el usuario no ha confirmado con s:
+								printf("*** Retiro abortado ***\n");
+							}
+							else
+							{
+								printf("Introduce Numero de unidades a retirar:\n");
+								scanf("%d", &numeroLibrosRetirados);
+								// Preparamos los argumentos:
+								retirar_1_arg.Ida = idAdministrador;
+								strcpy(retirar_1_arg.Isbn, libro.Isbn);
+								retirar_1_arg.NoLibros = numeroLibrosRetirados;
+								result_7 = retirar_1(&retirar_1_arg, clnt);
+								if (result_7 == (int *)NULL)
+								{
+									clnt_perror(clnt, "call failed");
+								}
+								else if (*result_7 == -1)
+								{
+									printf("ERROR: ya hay un administrador logueado\n");
+								}
+								else if (*result_7 == 0)
+								{
+									printf("ERROR: no se ha encontrado ningun libro\n");
+								}
+								else if (*result_7 == 2)
+								{
+									printf("ERROR: no hay suficientes ejemplares para ser retirados\n");
+								}
+								else if (*result_7 == 1)
+								{
+									printf("Se han reducido el número de ejemplares disponibles y se han ordenado los datos\n");
+								}
 							}
 						}
 					}
