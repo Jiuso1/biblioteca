@@ -239,7 +239,7 @@ int *comprar_1_svc(TComRet *argp, struct svc_req *rqstp)
 	TLibro clave = {};						 // Clave que utilizaremos para buscar el ISBN dado.
 	TLibro *resultado = NULL;				 // Puntero al resultado de la búsqueda.
 	int i = 0;
-	bool_t encontrado = FALSE; // Vale true cuando se ha encontrado el libro con el ISBN dado.
+	bool_t encontrado = FALSE; // Vale TRUE cuando se ha encontrado el libro con el ISBN dado.
 
 	if (IdAdmin != idAdminCliente)
 	{
@@ -289,7 +289,7 @@ int *retirar_1_svc(TComRet *argp, struct svc_req *rqstp)
 	TComRet consulta = *argp;				 // Copiamos el argumento.
 	const int idAdminCliente = consulta.Ida; // Id pasado por el cliente.
 	int i = 0;								 // Iterador para el bucle while.
-	bool_t encontrado = FALSE;				 // Vale true cuando se ha encontrado el libro con el ISBN dado.
+	bool_t encontrado = FALSE;				 // Vale TRUE cuando se ha encontrado el libro con el ISBN dado.
 	TLibro libro = {};						 // Libro buscado.
 
 	if (IdAdmin != idAdminCliente)
@@ -373,7 +373,7 @@ int *buscar_1_svc(TConsulta *argp, struct svc_req *rqstp)
 	TLibro clave = {};						 // Clave que utilizaremos para buscar el ISBN dado.
 	TLibro *resultado = NULL;				 // Puntero al resultado de la búsqueda.
 	int i = 0;
-	bool_t encontrado = FALSE; // Vale true cuando se ha encontrado el libro con el ISBN dado.
+	bool_t encontrado = FALSE; // Vale TRUE cuando se ha encontrado el libro con el ISBN dado.
 
 	if (IdAdmin != idAdminCliente)
 	{

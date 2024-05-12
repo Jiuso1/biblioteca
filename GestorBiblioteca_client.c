@@ -54,7 +54,7 @@ void gestorbiblioteca_1(char *host)
 		exit(1);
 	}
 #endif /* DEBUG */
-	int opcionElegida = menuPrincipal();
+	int opcionElegida = -1;
 	int contrasenha = 0;
 	int idAdministrador = 0;
 	Cadena nombreFichero = "";
@@ -79,342 +79,163 @@ void gestorbiblioteca_1(char *host)
 	int numeroLibrosComprados = 0;
 	int numeroLibrosRetirados = 0;
 
-	switch (opcionElegida)
+	do
 	{
-	case 1:
-	{
-		printf("Por favor inserte la contraseña de Administracion:\n");
-		scanf("%d", &contrasenha);
-		conexion_1_arg = contrasenha;
-		result_1 = conexion_1(&conexion_1_arg, clnt);
-		if (result_1 == (int *)NULL)
+		opcionElegida = menuPrincipal();
+		switch (opcionElegida)
 		{
-			clnt_perror(clnt, "call failed");
+		case 0:
+		{
+			printf("Cerrando programa...\n");
+			break;
 		}
-		else if (*result_1 == -2)
+		case 1:
 		{
-			printf("ERROR: la contrasenha introducida es incorrecta\n");
-		}
-		else if (*result_1 == -1)
-		{
-			printf("ERROR: ya hay un administrador logueado\n");
-		}
-		else
-		{
-			idAdministrador = *result_1; // Guardamos el id generado por el servidor en el cliente administrador.
-			printf("*** Contraseña correcta, puede acceder al menu de Administracion.**\n");
-			esperarEntradaPorConsola(); // Esperamos a que el usuario pulse cualquier tecla.
-			do
+			printf("Por favor inserte la contraseña de Administracion:\n");
+			scanf("%d", &contrasenha);
+			conexion_1_arg = contrasenha;
+			result_1 = conexion_1(&conexion_1_arg, clnt);
+			if (result_1 == (int *)NULL)
 			{
-				opcionElegida = menuAdministracion();
-				switch (opcionElegida)
+				clnt_perror(clnt, "call failed");
+			}
+			else if (*result_1 == -2)
+			{
+				printf("ERROR: la contrasenha introducida es incorrecta\n");
+			}
+			else if (*result_1 == -1)
+			{
+				printf("ERROR: ya hay un administrador logueado\n");
+			}
+			else
+			{
+				idAdministrador = *result_1; // Guardamos el id generado por el servidor en el cliente administrador.
+				printf("*** Contraseña correcta, puede acceder al menu de Administracion.**\n");
+				esperarEntradaPorConsola(); // Esperamos a que el usuario pulse cualquier tecla.
+				do
 				{
-				case 0:
-				{
-					desconexion_1_arg = idAdministrador;
-					result_2 = desconexion_1(&desconexion_1_arg, clnt);
-					if (result_2 == (bool_t *)NULL)
+					opcionElegida = menuAdministracion();
+					switch (opcionElegida)
 					{
-						clnt_perror(clnt, "call failed");
-					}
-					else if (*result_2 == FALSE)
+					case 0:
 					{
-						printf("ERROR: el id administrador no coincide con el del servidor\n");
-					}
-					else if (*result_2 == TRUE)
-					{
-						printf("Ha cerrado sesion con exito\n");
-					}
-					break;
-				}
-				case 1:
-				{
-					printf("Introduce el nombre del fichero de datos:\n");
-					scanf("%s", nombreFichero);
-					strcpy(cargardatos_1_arg.Datos, nombreFichero);
-					cargardatos_1_arg.Ida = idAdministrador;
-					result_3 = cargardatos_1(&cargardatos_1_arg, clnt);
-					if (result_3 == (int *)NULL)
-					{
-						clnt_perror(clnt, "call failed");
-					}
-					else if (*result_3 == -1)
-					{
-						printf("ERROR: ya hay un administrador logueado\n");
-					}
-					else if (*result_3 == 0)
-					{
-						printf("ERROR: error al cargar los datos\n");
-					}
-					else if (*result_3 == 1)
-					{
-						printf("Datos cargados y ordenados correctamente\n");
-					}
-					break;
-				}
-				case 2:
-				{
-					// Guardamos los datos de la biblioteca en el fichero.
-					guardardatos_1_arg = idAdministrador; // Le pasamos el id del administrador.
-					result_4 = guardardatos_1(&guardardatos_1_arg, clnt);
-					if (result_4 == (bool_t *)NULL)
-					{
-						clnt_perror(clnt, "call failed");
-					}
-					else if (*result_4 == FALSE)
-					{
-						printf("ERROR: no se ha podido la informacion en el fichero\n");
-					}
-					else
-					{
-						printf("Informacion salvada en el fichero correctamente\n");
-					}
-					break;
-				}
-				case 3:
-				{
-					// Pedimos los datos del nuevo libro:
-					printf("Introduce el Isbn:\n");
-					scanf("%s", isbn);
-					printf("Introduce el Autor:\n");
-					scanf("%s", autor);
-					printf("Introduce el Titulo:\n");
-					scanf("%s", titulo);
-					printf("Introduce el anio:\n");
-					scanf("%d", &anio);
-					printf("Introduce el Pais:\n");
-					scanf("%s", pais);
-					printf("Introduce el Idioma:\n");
-					scanf("%s", idioma);
-
-					// Llenamos la variable libro:
-					strcpy(libro.Isbn, isbn);
-					strcpy(libro.Autor, autor);
-					strcpy(libro.Titulo, titulo);
-					libro.Anio = anio;
-					strcpy(libro.Pais, pais);
-					strcpy(libro.Idioma, idioma);
-
-					// Inicializamos los valores no pedidos por consola:
-					libro.NoLibros = 0;
-					libro.NoListaEspera = 0;
-					libro.NoPrestados = 0;
-
-					nuevoLibro.Libro = libro;		  // Guardamos libro en el campo de nuevoLibro.
-					nuevoLibro.Ida = idAdministrador; // Guardamos el id administrador en el campo de nuevoLibro.
-					nuevolibro_1_arg = nuevoLibro;	  // Lo pasamos por argumento.
-					result_5 = nuevolibro_1(&nuevolibro_1_arg, clnt);
-					if (result_5 == (int *)NULL)
-					{
-						clnt_perror(clnt, "call failed");
-					}
-					else if (*result_5 == -1)
-					{
-						printf("ERROR: ya hay un administrador logueado\n");
-					}
-					else if (*result_5 == 0)
-					{
-						printf("ERROR: ya hay un libro registrado con el ISBN dado\n");
-					}
-					else if (*result_5 == 1)
-					{
-						printf("Se ha anhadido el nuevo libro correctamente\n");
-					}
-					break;
-				}
-				case 4:
-				{
-					printf("Introduce Isbn a Buscar:\n");
-					scanf("%s", isbnCompra);
-					// Por ISBN.
-					strcpy(buscar_1_arg.Datos, isbnCompra);
-					buscar_1_arg.Ida = idAdministrador;
-					result_10 = buscar_1(&buscar_1_arg, clnt);
-					if (result_10 == (int *)NULL)
-					{
-						clnt_perror(clnt, "call failed");
-					}
-					else if (*result_10 == -1)
-					{
-						printf("ERROR: no se ha encontrado ningun libro\n");
-					}
-					else if (*result_10 == -2)
-					{
-						printf("ERROR: ya hay un administrador logueado\n");
-					}
-					else
-					{
-						// Tenemos la posición del libro buscado en *result_10.
-						descargar_1_arg.Pos = *result_10;				 // Pasamos la posición para descargarlo.
-						result_11 = descargar_1(&descargar_1_arg, clnt); // Descargamos el libro.
-						libro = *result_11;								 // Guardamos el libro en la variable libro.
-						if (result_11 == (TLibro *)NULL)
+						desconexion_1_arg = idAdministrador;
+						result_2 = desconexion_1(&desconexion_1_arg, clnt);
+						if (result_2 == (bool_t *)NULL)
 						{
 							clnt_perror(clnt, "call failed");
 						}
-						else
+						else if (*result_2 == FALSE)
 						{
-							printf("%s\t%s\t%d\t%d\t%d\n", libro.Titulo, libro.Isbn, libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
-							printf("%s\t%s(%s)\t%d\n", libro.Autor, libro.Pais, libro.Idioma, libro.Anio);
-							printf("¿ Es este el libro al que desea comprar más unidades (s/n) ?\n");
-							scanf(" %c", &confirmacionCompra);
-							if (confirmacionCompra != 's')
-							{ // Si el usuario no ha confirmado con s:
-								printf("*** Compra abortada ***\n");
-							}
-							else
-							{ // Si el usuario ha confirmado con s:
-								printf("Introduce Numero de Libros comprados:\n");
-								scanf("%d", &numeroLibrosComprados);
-								// Pasamos los parámetros:
-								comprar_1_arg.Ida = idAdministrador;
-								strcpy(comprar_1_arg.Isbn, isbnCompra);
-								comprar_1_arg.NoLibros = numeroLibrosComprados;
-								result_6 = comprar_1(&comprar_1_arg, clnt);
-								if (result_6 == (int *)NULL)
-								{
-									clnt_perror(clnt, "call failed");
-								}
-								else if (*result_6 == -1)
-								{
-									printf("ERROR: ya hay un administrador logueado\n");
-								}
-								else if (*result_6 == 0)
-								{
-									printf("ERROR: no se ha encontrado el libro\n");
-								}
-								else if (*result_6 == 1)
-								{
-									printf("*** Se han agregado los nuevos ejemplares del libro y los datos están ordenados ***\n");
-								}
-							}
+							printf("ERROR: el id administrador no coincide con el del servidor\n");
 						}
+						else if (*result_2 == TRUE)
+						{
+							printf("Ha cerrado sesion con exito\n");
+						}
+						break;
 					}
-					break;
-				}
-				case 5:
-				{
-					printf("Introduce Isbn a Buscar:\n");
-					scanf("%s", isbnCompra);
-					// Por ISBN.
-					strcpy(buscar_1_arg.Datos, isbnCompra);
-					buscar_1_arg.Ida = idAdministrador;
-					result_10 = buscar_1(&buscar_1_arg, clnt);
-					if (result_10 == (int *)NULL)
+					case 1:
 					{
-						clnt_perror(clnt, "call failed");
-					}
-					else if (*result_10 == -1)
-					{
-						printf("ERROR: no se ha encontrado ningun libro\n");
-					}
-					else if (*result_10 == -2)
-					{
-						printf("ERROR: ya hay un administrador logueado\n");
-					}
-					else
-					{
-						// Tenemos la posición del libro buscado en *result_10.
-						descargar_1_arg.Pos = *result_10;				 // Pasamos la posición para descargarlo.
-						result_11 = descargar_1(&descargar_1_arg, clnt); // Descargamos el libro.
-						libro = *result_11;								 // Guardamos el libro en la variable libro.
-						if (result_11 == (TLibro *)NULL)
+						printf("Introduce el nombre del fichero de datos:\n");
+						scanf("%s", nombreFichero);
+						strcpy(cargardatos_1_arg.Datos, nombreFichero);
+						cargardatos_1_arg.Ida = idAdministrador;
+						result_3 = cargardatos_1(&cargardatos_1_arg, clnt);
+						if (result_3 == (int *)NULL)
 						{
 							clnt_perror(clnt, "call failed");
 						}
+						else if (*result_3 == -1)
+						{
+							printf("ERROR: ya hay un administrador logueado\n");
+						}
+						else if (*result_3 == 0)
+						{
+							printf("ERROR: error al cargar los datos\n");
+						}
+						else if (*result_3 == 1)
+						{
+							printf("Datos cargados y ordenados correctamente\n");
+						}
+						break;
+					}
+					case 2:
+					{
+						// Guardamos los datos de la biblioteca en el fichero.
+						guardardatos_1_arg = idAdministrador; // Le pasamos el id del administrador.
+						result_4 = guardardatos_1(&guardardatos_1_arg, clnt);
+						if (result_4 == (bool_t *)NULL)
+						{
+							clnt_perror(clnt, "call failed");
+						}
+						else if (*result_4 == FALSE)
+						{
+							printf("ERROR: no se ha podido la informacion en el fichero\n");
+						}
 						else
 						{
-							printf("%s\t%s\t%d\t%d\t%d\n", libro.Titulo, libro.Isbn, libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
-							printf("%s\t%s(%s)\t%d\n", libro.Autor, libro.Pais, libro.Idioma, libro.Anio);
-							printf("¿ Es este el libro al que desea retirar unidades (s/n) ?\n");
-							scanf(" %c", &confirmacionCompra);
-							if (confirmacionCompra != 's')
-							{ // Si el usuario no ha confirmado con s:
-								printf("*** Retiro abortado ***\n");
-							}
-							else
-							{
-								printf("Introduce Numero de unidades a retirar:\n");
-								scanf("%d", &numeroLibrosRetirados);
-								// Preparamos los argumentos:
-								retirar_1_arg.Ida = idAdministrador;
-								strcpy(retirar_1_arg.Isbn, libro.Isbn);
-								retirar_1_arg.NoLibros = numeroLibrosRetirados;
-								result_7 = retirar_1(&retirar_1_arg, clnt);
-								if (result_7 == (int *)NULL)
-								{
-									clnt_perror(clnt, "call failed");
-								}
-								else if (*result_7 == -1)
-								{
-									printf("ERROR: ya hay un administrador logueado\n");
-								}
-								else if (*result_7 == 0)
-								{
-									printf("ERROR: no se ha encontrado ningun libro\n");
-								}
-								else if (*result_7 == 2)
-								{
-									printf("ERROR: no hay suficientes ejemplares para ser retirados\n");
-								}
-								else if (*result_7 == 1)
-								{
-									printf("Se han reducido el número de ejemplares disponibles y se han ordenado los datos\n");
-								}
-							}
+							printf("Informacion salvada en el fichero correctamente\n");
 						}
+						break;
 					}
-					break;
-				}
-				case 6:
-				{
-					printf("0.- Por Isbn\n");
-					printf("1.- Por Titulo\n");
-					printf("2.- Por Autor\n");
-					printf("3.- Por Anho\n");
-					printf("4.- Por Pais\n");
-					printf("5.- Por Idioma\n");
-					printf("6.- Por nº de libros Disponibles\n");
-					printf("7.- Por nº de libros Prestados\n");
-					printf("8.- Por nº de libros en Espera\n");
-					printf("Elige el campo que ordenara los libros:\n");
-					scanf("%d", &campoElegido);
-					// Preparamos el argumento:
-					ordenar_1_arg.Campo = campoElegido;
-					ordenar_1_arg.Ida = idAdministrador;
-					// Llamamos a ordenar en el servidor:
-					result_8 = ordenar_1(&ordenar_1_arg, clnt);
-					if (result_8 == (bool_t *)NULL)
+					case 3:
 					{
-						clnt_perror(clnt, "call failed");
-					}
-					else if (*result_8 == FALSE)
-					{
-						printf("ERROR: el id administrador no coincide con el del servidor\n");
-					}
-					else if (*result_8 == TRUE)
-					{
-						printf("Se ha ordenado correctamente el vector\n");
-					}
-					break;
-				}
-				case 7:
-				{
-					printf("Introduce el texto a buscar:\n");
-					scanf("%s", textoABuscar);
-					printf("I.- Por Isbn\n");
-					printf("T.- Por Titulo\n");
-					printf("A.- Por Autor\n");
-					printf("P.- Por Pais\n");
-					printf("D.- Por Idioma\n");
-					printf("*.- Por todos los campos\n");
-					printf("Introduce el codigo de busqueda\n");
-					scanf(" %c", &codigoBusqueda); // Para que el salto de línea de textoABuscar no nos fastidie, ponemos un espacio.
+						// Pedimos los datos del nuevo libro:
+						printf("Introduce el Isbn:\n");
+						scanf("%s", isbn);
+						printf("Introduce el Autor:\n");
+						scanf("%s", autor);
+						printf("Introduce el Titulo:\n");
+						scanf("%s", titulo);
+						printf("Introduce el anio:\n");
+						scanf("%d", &anio);
+						printf("Introduce el Pais:\n");
+						scanf("%s", pais);
+						printf("Introduce el Idioma:\n");
+						scanf("%s", idioma);
 
-					if (codigoBusqueda == 'I')
+						// Llenamos la variable libro:
+						strcpy(libro.Isbn, isbn);
+						strcpy(libro.Autor, autor);
+						strcpy(libro.Titulo, titulo);
+						libro.Anio = anio;
+						strcpy(libro.Pais, pais);
+						strcpy(libro.Idioma, idioma);
+
+						// Inicializamos los valores no pedidos por consola:
+						libro.NoLibros = 0;
+						libro.NoListaEspera = 0;
+						libro.NoPrestados = 0;
+
+						nuevoLibro.Libro = libro;		  // Guardamos libro en el campo de nuevoLibro.
+						nuevoLibro.Ida = idAdministrador; // Guardamos el id administrador en el campo de nuevoLibro.
+						nuevolibro_1_arg = nuevoLibro;	  // Lo pasamos por argumento.
+						result_5 = nuevolibro_1(&nuevolibro_1_arg, clnt);
+						if (result_5 == (int *)NULL)
+						{
+							clnt_perror(clnt, "call failed");
+						}
+						else if (*result_5 == -1)
+						{
+							printf("ERROR: ya hay un administrador logueado\n");
+						}
+						else if (*result_5 == 0)
+						{
+							printf("ERROR: ya hay un libro registrado con el ISBN dado\n");
+						}
+						else if (*result_5 == 1)
+						{
+							printf("Se ha anhadido el nuevo libro correctamente\n");
+						}
+						break;
+					}
+					case 4:
 					{
+						printf("Introduce Isbn a Buscar:\n");
+						scanf("%s", isbnCompra);
 						// Por ISBN.
-						strcpy(buscar_1_arg.Datos, textoABuscar);
+						strcpy(buscar_1_arg.Datos, isbnCompra);
 						buscar_1_arg.Ida = idAdministrador;
 						result_10 = buscar_1(&buscar_1_arg, clnt);
 						if (result_10 == (int *)NULL)
@@ -443,12 +264,351 @@ void gestorbiblioteca_1(char *host)
 							{
 								printf("%s\t%s\t%d\t%d\t%d\n", libro.Titulo, libro.Isbn, libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
 								printf("%s\t%s(%s)\t%d\n", libro.Autor, libro.Pais, libro.Idioma, libro.Anio);
+								printf("¿ Es este el libro al que desea comprar más unidades (s/n) ?\n");
+								scanf(" %c", &confirmacionCompra);
+								if (confirmacionCompra != 's')
+								{ // Si el usuario no ha confirmado con s:
+									printf("*** Compra abortada ***\n");
+								}
+								else
+								{ // Si el usuario ha confirmado con s:
+									printf("Introduce Numero de Libros comprados:\n");
+									scanf("%d", &numeroLibrosComprados);
+									// Pasamos los parámetros:
+									comprar_1_arg.Ida = idAdministrador;
+									strcpy(comprar_1_arg.Isbn, isbnCompra);
+									comprar_1_arg.NoLibros = numeroLibrosComprados;
+									result_6 = comprar_1(&comprar_1_arg, clnt);
+									if (result_6 == (int *)NULL)
+									{
+										clnt_perror(clnt, "call failed");
+									}
+									else if (*result_6 == -1)
+									{
+										printf("ERROR: ya hay un administrador logueado\n");
+									}
+									else if (*result_6 == 0)
+									{
+										printf("ERROR: no se ha encontrado el libro\n");
+									}
+									else if (*result_6 == 1)
+									{
+										printf("*** Se han agregado los nuevos ejemplares del libro y los datos están ordenados ***\n");
+									}
+								}
 							}
 						}
+						break;
 					}
-					else
+					case 5:
 					{
-						// Si no buscamos por ISBN, descargaremos cada libro y filtraremos:
+						printf("Introduce Isbn a Buscar:\n");
+						scanf("%s", isbnCompra);
+						// Por ISBN.
+						strcpy(buscar_1_arg.Datos, isbnCompra);
+						buscar_1_arg.Ida = idAdministrador;
+						result_10 = buscar_1(&buscar_1_arg, clnt);
+						if (result_10 == (int *)NULL)
+						{
+							clnt_perror(clnt, "call failed");
+						}
+						else if (*result_10 == -1)
+						{
+							printf("ERROR: no se ha encontrado ningun libro\n");
+						}
+						else if (*result_10 == -2)
+						{
+							printf("ERROR: ya hay un administrador logueado\n");
+						}
+						else
+						{
+							// Tenemos la posición del libro buscado en *result_10.
+							descargar_1_arg.Pos = *result_10;				 // Pasamos la posición para descargarlo.
+							result_11 = descargar_1(&descargar_1_arg, clnt); // Descargamos el libro.
+							libro = *result_11;								 // Guardamos el libro en la variable libro.
+							if (result_11 == (TLibro *)NULL)
+							{
+								clnt_perror(clnt, "call failed");
+							}
+							else
+							{
+								printf("%s\t%s\t%d\t%d\t%d\n", libro.Titulo, libro.Isbn, libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
+								printf("%s\t%s(%s)\t%d\n", libro.Autor, libro.Pais, libro.Idioma, libro.Anio);
+								printf("¿ Es este el libro al que desea retirar unidades (s/n) ?\n");
+								scanf(" %c", &confirmacionCompra);
+								if (confirmacionCompra != 's')
+								{ // Si el usuario no ha confirmado con s:
+									printf("*** Retiro abortado ***\n");
+								}
+								else
+								{
+									printf("Introduce Numero de unidades a retirar:\n");
+									scanf("%d", &numeroLibrosRetirados);
+									// Preparamos los argumentos:
+									retirar_1_arg.Ida = idAdministrador;
+									strcpy(retirar_1_arg.Isbn, libro.Isbn);
+									retirar_1_arg.NoLibros = numeroLibrosRetirados;
+									result_7 = retirar_1(&retirar_1_arg, clnt);
+									if (result_7 == (int *)NULL)
+									{
+										clnt_perror(clnt, "call failed");
+									}
+									else if (*result_7 == -1)
+									{
+										printf("ERROR: ya hay un administrador logueado\n");
+									}
+									else if (*result_7 == 0)
+									{
+										printf("ERROR: no se ha encontrado ningun libro\n");
+									}
+									else if (*result_7 == 2)
+									{
+										printf("ERROR: no hay suficientes ejemplares para ser retirados\n");
+									}
+									else if (*result_7 == 1)
+									{
+										printf("Se han reducido el número de ejemplares disponibles y se han ordenado los datos\n");
+									}
+								}
+							}
+						}
+						break;
+					}
+					case 6:
+					{
+						printf("0.- Por Isbn\n");
+						printf("1.- Por Titulo\n");
+						printf("2.- Por Autor\n");
+						printf("3.- Por Anho\n");
+						printf("4.- Por Pais\n");
+						printf("5.- Por Idioma\n");
+						printf("6.- Por nº de libros Disponibles\n");
+						printf("7.- Por nº de libros Prestados\n");
+						printf("8.- Por nº de libros en Espera\n");
+						printf("Elige el campo que ordenara los libros:\n");
+						scanf("%d", &campoElegido);
+						// Preparamos el argumento:
+						ordenar_1_arg.Campo = campoElegido;
+						ordenar_1_arg.Ida = idAdministrador;
+						// Llamamos a ordenar en el servidor:
+						result_8 = ordenar_1(&ordenar_1_arg, clnt);
+						if (result_8 == (bool_t *)NULL)
+						{
+							clnt_perror(clnt, "call failed");
+						}
+						else if (*result_8 == FALSE)
+						{
+							printf("ERROR: el id administrador no coincide con el del servidor\n");
+						}
+						else if (*result_8 == TRUE)
+						{
+							printf("Se ha ordenado correctamente el vector\n");
+						}
+						break;
+					}
+					case 7:
+					{
+						printf("Introduce el texto a buscar:\n");
+						scanf("%s", textoABuscar);
+						printf("I.- Por Isbn\n");
+						printf("T.- Por Titulo\n");
+						printf("A.- Por Autor\n");
+						printf("P.- Por Pais\n");
+						printf("D.- Por Idioma\n");
+						printf("*.- Por todos los campos\n");
+						printf("Introduce el codigo de busqueda\n");
+						scanf(" %c", &codigoBusqueda); // Para que el salto de línea de textoABuscar no nos fastidie, ponemos un espacio.
+
+						if (codigoBusqueda == 'I')
+						{
+							// Por ISBN.
+							strcpy(buscar_1_arg.Datos, textoABuscar);
+							buscar_1_arg.Ida = idAdministrador;
+							result_10 = buscar_1(&buscar_1_arg, clnt);
+							if (result_10 == (int *)NULL)
+							{
+								clnt_perror(clnt, "call failed");
+							}
+							else if (*result_10 == -1)
+							{
+								printf("ERROR: no se ha encontrado ningun libro\n");
+							}
+							else if (*result_10 == -2)
+							{
+								printf("ERROR: ya hay un administrador logueado\n");
+							}
+							else
+							{
+								// Tenemos la posición del libro buscado en *result_10.
+								descargar_1_arg.Pos = *result_10;				 // Pasamos la posición para descargarlo.
+								result_11 = descargar_1(&descargar_1_arg, clnt); // Descargamos el libro.
+								libro = *result_11;								 // Guardamos el libro en la variable libro.
+								if (result_11 == (TLibro *)NULL)
+								{
+									clnt_perror(clnt, "call failed");
+								}
+								else
+								{
+									printf("%s\t%s\t%d\t%d\t%d\n", libro.Titulo, libro.Isbn, libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
+									printf("%s\t%s(%s)\t%d\n", libro.Autor, libro.Pais, libro.Idioma, libro.Anio);
+								}
+							}
+						}
+						else
+						{
+							// Si no buscamos por ISBN, descargaremos cada libro y filtraremos:
+							result_9 = nlibros_1(&nlibros_1_arg, clnt); // Recogemos el nº de libros del servidor.
+							if (result_9 == (int *)NULL)
+							{
+								clnt_perror(clnt, "call failed");
+							}
+							else
+							{
+								printf("POS\tTITULO\tISBN\tDIS\tPRE\tPOS\n");
+								printf("\tAUTOR\tPAIS (IDIOMA)\tANIO\n");
+								printf("*********************************************************************************************\n");
+
+								NumLibros = *result_9; // Guardamos el resultado en la variable del cliente.
+
+								descargar_1_arg.Ida = idAdministrador; // Le pasamos al servidor nuestro id.
+
+								// Descargaremos cada libro del servidor. Si pasa el filtrado, lo mostraremos por pantalla:
+								for (int i = 0; i < NumLibros; i++)
+								{
+									descargar_1_arg.Pos = i;						 // Iteramos usando descargar_1_arg e i.
+									result_11 = descargar_1(&descargar_1_arg, clnt); // Descarga el libro i.
+									if (result_11 == (TLibro *)NULL)
+									{
+										clnt_perror(clnt, "call failed");
+									}
+									else
+									{
+										libro = *result_11; // Hemos recibido el resultado bien, podemos guardarlo en libro.
+										// Solo mostraremos el libro si aparece la cadena buscada en los campos deseados.
+										// Usaremos strstr, y un array de punteros.
+										// Para la búsqueda monocampo, emplearemos el puntero respectivo: punteroAlgunaCoincidencia[i]. i valdrá lo que diga el mapa: {Isbn:0, Titulo:1, Autor:2, Pais:3, Idioma:4}.
+										// Para la búsqueda multicampo (*), emplearemos todo el array de punteros: punteroAlgunaCoincidencia.
+
+										switch (codigoBusqueda)
+										{
+										case 'T':
+										{																	   // Por título.
+											punteroAlgunaCoincidencia[1] = strstr(libro.Titulo, textoABuscar); // Titulo:1.
+											// Inicializo el resto de punteros a NULL:
+											punteroAlgunaCoincidencia[0] = NULL;
+											punteroAlgunaCoincidencia[2] = NULL;
+											punteroAlgunaCoincidencia[3] = NULL;
+											punteroAlgunaCoincidencia[4] = NULL;
+											break;
+										}
+										case 'A':
+										{																	  // Por autor.
+											punteroAlgunaCoincidencia[2] = strstr(libro.Autor, textoABuscar); // Autor:2.
+											// Inicializo el resto de punteros a NULL:
+											punteroAlgunaCoincidencia[0] = NULL;
+											punteroAlgunaCoincidencia[1] = NULL;
+											punteroAlgunaCoincidencia[3] = NULL;
+											punteroAlgunaCoincidencia[4] = NULL;
+											break;
+										}
+										case 'P':
+										{																	 // Por país.
+											punteroAlgunaCoincidencia[3] = strstr(libro.Pais, textoABuscar); // Pais:3.
+											// Inicializo el resto de punteros a NULL:
+											punteroAlgunaCoincidencia[0] = NULL;
+											punteroAlgunaCoincidencia[1] = NULL;
+											punteroAlgunaCoincidencia[2] = NULL;
+											punteroAlgunaCoincidencia[4] = NULL;
+											break;
+										}
+										case 'D':
+										{																	   // Por idioma.
+											punteroAlgunaCoincidencia[4] = strstr(libro.Idioma, textoABuscar); // Idioma:4.
+											// Inicializo el resto de punteros a NULL:
+											punteroAlgunaCoincidencia[0] = NULL;
+											punteroAlgunaCoincidencia[1] = NULL;
+											punteroAlgunaCoincidencia[2] = NULL;
+											punteroAlgunaCoincidencia[3] = NULL;
+											break;
+										}
+										case '*':
+										{ // Por todos los campos.
+											punteroAlgunaCoincidencia[0] = strstr(libro.Isbn, textoABuscar);
+											punteroAlgunaCoincidencia[1] = strstr(libro.Titulo, textoABuscar);
+											punteroAlgunaCoincidencia[2] = strstr(libro.Autor, textoABuscar);
+											punteroAlgunaCoincidencia[3] = strstr(libro.Pais, textoABuscar);
+											punteroAlgunaCoincidencia[4] = strstr(libro.Idioma, textoABuscar);
+											break;
+										}
+										}
+
+										if (punteroAlgunaCoincidencia[0] != NULL || punteroAlgunaCoincidencia[1] != NULL || punteroAlgunaCoincidencia[2] != NULL || punteroAlgunaCoincidencia[3] != NULL || punteroAlgunaCoincidencia[4] != NULL)
+										{
+											/*printf("%d\t%s\t%s\t%d\t%d\t%d\n", i, libro.Titulo, libro.Isbn, libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
+											printf("%s\t%s(%s)\t%d\n", libro.Autor, libro.Pais, libro.Idioma, libro.Anio);*/
+											printf("%d\t", i);
+
+											if (punteroAlgunaCoincidencia[1] != NULL)
+											{ // Si coincide el titulo (Titulo:1), lo coloreo:
+												printf(GREEN_ON "%s" GREEN_OFF "\t", libro.Titulo);
+											}
+											else
+											{ // Si no hay coincidencia simplemente lo escribo:
+												printf("%s\t", libro.Titulo);
+											}
+
+											if (punteroAlgunaCoincidencia[0])
+											{ // Si coincide el (Isbn:0), lo coloreo:
+												printf(GREEN_ON "%s"
+																"\t" GREEN_OFF,
+													   libro.Isbn);
+											}
+											else
+											{ // Si no hay coincidencia simplemente lo escribo:
+												printf("%s\t", libro.Isbn);
+											}
+
+											printf("%d\t%d\t%d\n", libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
+
+											if (punteroAlgunaCoincidencia[2] != NULL)
+											{ // Si coincide el autor (Autor:2), lo coloreo:
+												printf(GREEN_ON "%s" GREEN_OFF "\t", libro.Autor);
+											}
+											else
+											{ // Si no hay coincidencia simplemente lo escribo:
+												printf("%s\t", libro.Autor);
+											}
+
+											if (punteroAlgunaCoincidencia[3] != NULL)
+											{ // Si coincide el pais (Pais:3), lo coloreo:
+												printf(GREEN_ON "%s" GREEN_OFF "(", libro.Pais);
+											}
+											else
+											{ // Si no hay coincidencia simplemente lo escribo:
+												printf("%s(", libro.Pais);
+											}
+
+											if (punteroAlgunaCoincidencia[4] != NULL)
+											{ // Si coincide el idioma (Idioma:4), lo coloreo:
+												printf(GREEN_ON "%s" GREEN_OFF ")\t", libro.Idioma);
+											}
+											else
+											{ // Si no hay coincidencia simplemente lo escribo:
+												printf("%s)\t", libro.Idioma);
+											}
+
+											printf("%d\n", libro.Anio);
+										}
+									}
+								}
+							}
+						}
+						break;
+					}
+					case 8:
+					{
+						// Recogemos del servidor el numero de libros:
+						nlibros_1_arg = idAdministrador;			// Le pasamos al servidor el id de administrador.
 						result_9 = nlibros_1(&nlibros_1_arg, clnt); // Recogemos el nº de libros del servidor.
 						if (result_9 == (int *)NULL)
 						{
@@ -456,6 +616,7 @@ void gestorbiblioteca_1(char *host)
 						}
 						else
 						{
+							// Ya formatearemos guay la práctica y le meteremos musiquita, ahora nos debemos centrar en que funcione simplemente.
 							printf("POS\tTITULO\tISBN\tDIS\tPRE\tPOS\n");
 							printf("\tAUTOR\tPAIS (IDIOMA)\tANIO\n");
 							printf("*********************************************************************************************\n");
@@ -464,7 +625,7 @@ void gestorbiblioteca_1(char *host)
 
 							descargar_1_arg.Ida = idAdministrador; // Le pasamos al servidor nuestro id.
 
-							// Descargaremos cada libro del servidor. Si pasa el filtrado, lo mostraremos por pantalla:
+							// Descargamos cada libro del servidor y lo mostramos por pantalla:
 							for (int i = 0; i < NumLibros; i++)
 							{
 								descargar_1_arg.Pos = i;						 // Iteramos usando descargar_1_arg e i.
@@ -475,175 +636,33 @@ void gestorbiblioteca_1(char *host)
 								}
 								else
 								{
-									libro = *result_11; // Hemos recibido el resultado bien, podemos guardarlo en libro.
-									// Solo mostraremos el libro si aparece la cadena buscada en los campos deseados.
-									// Usaremos strstr, y un array de punteros.
-									// Para la búsqueda monocampo, emplearemos el puntero respectivo: punteroAlgunaCoincidencia[i]. i valdrá lo que diga el mapa: {Isbn:0, Titulo:1, Autor:2, Pais:3, Idioma:4}.
-									// Para la búsqueda multicampo (*), emplearemos todo el array de punteros: punteroAlgunaCoincidencia.
-
-									switch (codigoBusqueda)
-									{
-									case 'T':
-									{																	   // Por título.
-										punteroAlgunaCoincidencia[1] = strstr(libro.Titulo, textoABuscar); // Titulo:1.
-										// Inicializo el resto de punteros a NULL:
-										punteroAlgunaCoincidencia[0] = NULL;
-										punteroAlgunaCoincidencia[2] = NULL;
-										punteroAlgunaCoincidencia[3] = NULL;
-										punteroAlgunaCoincidencia[4] = NULL;
-										break;
-									}
-									case 'A':
-									{																	  // Por autor.
-										punteroAlgunaCoincidencia[2] = strstr(libro.Autor, textoABuscar); // Autor:2.
-										// Inicializo el resto de punteros a NULL:
-										punteroAlgunaCoincidencia[0] = NULL;
-										punteroAlgunaCoincidencia[1] = NULL;
-										punteroAlgunaCoincidencia[3] = NULL;
-										punteroAlgunaCoincidencia[4] = NULL;
-										break;
-									}
-									case 'P':
-									{																	 // Por país.
-										punteroAlgunaCoincidencia[3] = strstr(libro.Pais, textoABuscar); // Pais:3.
-										// Inicializo el resto de punteros a NULL:
-										punteroAlgunaCoincidencia[0] = NULL;
-										punteroAlgunaCoincidencia[1] = NULL;
-										punteroAlgunaCoincidencia[2] = NULL;
-										punteroAlgunaCoincidencia[4] = NULL;
-										break;
-									}
-									case 'D':
-									{																	   // Por idioma.
-										punteroAlgunaCoincidencia[4] = strstr(libro.Idioma, textoABuscar); // Idioma:4.
-										// Inicializo el resto de punteros a NULL:
-										punteroAlgunaCoincidencia[0] = NULL;
-										punteroAlgunaCoincidencia[1] = NULL;
-										punteroAlgunaCoincidencia[2] = NULL;
-										punteroAlgunaCoincidencia[3] = NULL;
-										break;
-									}
-									case '*':
-									{ // Por todos los campos.
-										punteroAlgunaCoincidencia[0] = strstr(libro.Isbn, textoABuscar);
-										punteroAlgunaCoincidencia[1] = strstr(libro.Titulo, textoABuscar);
-										punteroAlgunaCoincidencia[2] = strstr(libro.Autor, textoABuscar);
-										punteroAlgunaCoincidencia[3] = strstr(libro.Pais, textoABuscar);
-										punteroAlgunaCoincidencia[4] = strstr(libro.Idioma, textoABuscar);
-										break;
-									}
-									}
-
-									if (punteroAlgunaCoincidencia[0] != NULL || punteroAlgunaCoincidencia[1] != NULL || punteroAlgunaCoincidencia[2] != NULL || punteroAlgunaCoincidencia[3] != NULL || punteroAlgunaCoincidencia[4] != NULL)
-									{
-										/*printf("%d\t%s\t%s\t%d\t%d\t%d\n", i, libro.Titulo, libro.Isbn, libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
-										printf("%s\t%s(%s)\t%d\n", libro.Autor, libro.Pais, libro.Idioma, libro.Anio);*/
-										printf("%d\t", i);
-
-										if (punteroAlgunaCoincidencia[1] != NULL)
-										{ // Si coincide el titulo (Titulo:1), lo coloreo:
-											printf(GREEN_ON "%s" GREEN_OFF "\t", libro.Titulo);
-										}
-										else
-										{ // Si no hay coincidencia simplemente lo escribo:
-											printf("%s\t", libro.Titulo);
-										}
-
-										if (punteroAlgunaCoincidencia[0])
-										{ // Si coincide el (Isbn:0), lo coloreo:
-											printf(GREEN_ON "%s"
-															"\t" GREEN_OFF,
-												   libro.Isbn);
-										}
-										else
-										{ // Si no hay coincidencia simplemente lo escribo:
-											printf("%s\t", libro.Isbn);
-										}
-
-										printf("%d\t%d\t%d\n", libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
-
-										if (punteroAlgunaCoincidencia[2] != NULL)
-										{ // Si coincide el autor (Autor:2), lo coloreo:
-											printf(GREEN_ON "%s" GREEN_OFF "\t", libro.Autor);
-										}
-										else
-										{ // Si no hay coincidencia simplemente lo escribo:
-											printf("%s\t", libro.Autor);
-										}
-
-										if (punteroAlgunaCoincidencia[3] != NULL)
-										{ // Si coincide el pais (Pais:3), lo coloreo:
-											printf(GREEN_ON "%s" GREEN_OFF "(", libro.Pais);
-										}
-										else
-										{ // Si no hay coincidencia simplemente lo escribo:
-											printf("%s(", libro.Pais);
-										}
-
-										if (punteroAlgunaCoincidencia[4] != NULL)
-										{ // Si coincide el idioma (Idioma:4), lo coloreo:
-											printf(GREEN_ON "%s" GREEN_OFF ")\t", libro.Idioma);
-										}
-										else
-										{ // Si no hay coincidencia simplemente lo escribo:
-											printf("%s)\t", libro.Idioma);
-										}
-
-										printf("%d\n", libro.Anio);
-									}
+									// Hemos recibido el resultado bien, podemos guardarlo en libro y escribir por pantalla.
+									libro = *result_11;
+									printf("%d\t%s\t%s\t%d\t%d\t%d\n", i, libro.Titulo, libro.Isbn, libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
+									printf("%s\t%s(%s)\t%d\n", libro.Autor, libro.Pais, libro.Idioma, libro.Anio);
 								}
 							}
 						}
+						break;
 					}
-					break;
-				}
-				case 8:
-				{
-					// Recogemos del servidor el numero de libros:
-					nlibros_1_arg = idAdministrador;			// Le pasamos al servidor el id de administrador.
-					result_9 = nlibros_1(&nlibros_1_arg, clnt); // Recogemos el nº de libros del servidor.
-					if (result_9 == (int *)NULL)
-					{
-						clnt_perror(clnt, "call failed");
 					}
-					else
-					{
-						// Ya formatearemos guay la práctica y le meteremos musiquita, ahora nos debemos centrar en que funcione simplemente.
-						printf("POS\tTITULO\tISBN\tDIS\tPRE\tPOS\n");
-						printf("\tAUTOR\tPAIS (IDIOMA)\tANIO\n");
-						printf("*********************************************************************************************\n");
-
-						NumLibros = *result_9; // Guardamos el resultado en la variable del cliente.
-
-						descargar_1_arg.Ida = idAdministrador; // Le pasamos al servidor nuestro id.
-
-						// Descargamos cada libro del servidor y lo mostramos por pantalla:
-						for (int i = 0; i < NumLibros; i++)
-						{
-							descargar_1_arg.Pos = i;						 // Iteramos usando descargar_1_arg e i.
-							result_11 = descargar_1(&descargar_1_arg, clnt); // Descarga el libro i.
-							if (result_11 == (TLibro *)NULL)
-							{
-								clnt_perror(clnt, "call failed");
-							}
-							else
-							{
-								// Hemos recibido el resultado bien, podemos guardarlo en libro y escribir por pantalla.
-								libro = *result_11;
-								printf("%d\t%s\t%s\t%d\t%d\t%d\n", i, libro.Titulo, libro.Isbn, libro.NoLibros, libro.NoPrestados, libro.NoListaEspera);
-								printf("%s\t%s(%s)\t%d\n", libro.Autor, libro.Pais, libro.Idioma, libro.Anio);
-							}
-						}
-					}
-					break;
-				}
-				}
-				esperarEntradaPorConsola(); // Esperamos a que el usuario pulse cualquier tecla.
-			} while (opcionElegida != 0);
+					esperarEntradaPorConsola(); // Esperamos a que el usuario pulse cualquier tecla.
+				} while (opcionElegida != 0);
+				opcionElegida = -1; // Si salimos del menú de administración, reseteamos la variable. Esto lo hacemos para evitar salir del menú principal.
+			}
+			break;
 		}
-		break;
-	}
-	}
+		case 2:
+		{
+			printf("jajaxd\n");
+			break;
+		}
+		}
+		if (opcionElegida != -1)
+		{								// Si la opción elegida se ha introducido:
+			esperarEntradaPorConsola(); // Esperamos a que el usuario pulse cualquier tecla.
+		}
+	} while (opcionElegida != 0);
 #ifndef DEBUG
 	clnt_destroy(clnt);
 #endif /* DEBUG */
@@ -664,7 +683,7 @@ int main(int argc, char *argv[])
 }
 int menuPrincipal()
 {
-	int opcionElegida = 0;
+	int opcionElegida = -1;
 	do
 	{
 		system("clear");
@@ -684,7 +703,7 @@ int menuPrincipal()
 
 int menuAdministracion()
 {
-	int opcionElegida = 0;
+	int opcionElegida = -1;
 	do
 	{
 		system("clear");
