@@ -438,9 +438,30 @@ int *prestar_1_svc(TPosicion *argp, struct svc_req *rqstp)
 {
 	static int result;
 
-	/*
-	 * insert server code here
-	 */
+	if (argp->Pos < 0 || argp->Pos >= NumLibros)
+	{
+		result = -1;
+		return &result;
+	}
+	else if (Biblioteca[argp->Pos].NoLibros == 0)
+	{
+		result = 0;
+		Biblioteca[argp->Pos].NoListaEspera++;
+		// Procedemos a ordenar el array. Le pasamos el array, el nº de libros, lo que ocupa un libro y cómo compara:
+		qsort(Biblioteca, NumLibros, sizeof(struct TLibro), compararCampo); // https://www.geeksforgeeks.org/sort-array-of-structs-with-qsort-in-c/
+																			// compararCampo ya tiene en cuenta el campo deseado por el que ordenaremos.
+		return &result;
+	}
+	else
+	{
+		result = 1;
+		Biblioteca[argp->Pos].NoLibros--;
+		Biblioteca[argp->Pos].NoPrestados++;
+		// Procedemos a ordenar el array. Le pasamos el array, el nº de libros, lo que ocupa un libro y cómo compara:
+		qsort(Biblioteca, NumLibros, sizeof(struct TLibro), compararCampo); // https://www.geeksforgeeks.org/sort-array-of-structs-with-qsort-in-c/
+																			// compararCampo ya tiene en cuenta el campo deseado por el que ordenaremos.
+		return &result;
+	}
 
 	return &result;
 }
@@ -449,9 +470,36 @@ int *devolver_1_svc(TPosicion *argp, struct svc_req *rqstp)
 {
 	static int result;
 
-	/*
-	 * insert server code here
-	 */
+	if (argp->Pos < 0 || argp->Pos >= NumLibros)
+	{
+		result = -1;
+		return &result;
+	}
+	else if (Biblioteca[argp->Pos].NoListaEspera > 0)
+	{
+		result = 0;
+		Biblioteca[argp->Pos].NoListaEspera--;
+		Biblioteca[argp->Pos].NoPrestados++;
+		// Procedemos a ordenar el array. Le pasamos el array, el nº de libros, lo que ocupa un libro y cómo compara:
+		qsort(Biblioteca, NumLibros, sizeof(struct TLibro), compararCampo); // https://www.geeksforgeeks.org/sort-array-of-structs-with-qsort-in-c/
+																			// compararCampo ya tiene en cuenta el campo deseado por el que ordenaremos.
+		return &result;
+	}
+	else if (Biblioteca[argp->Pos].NoPrestados > 0)
+	{
+		result = 1;
+		Biblioteca[argp->Pos].NoLibros++;
+		Biblioteca[argp->Pos].NoPrestados--;
+		// Procedemos a ordenar el array. Le pasamos el array, el nº de libros, lo que ocupa un libro y cómo compara:
+		qsort(Biblioteca, NumLibros, sizeof(struct TLibro), compararCampo); // https://www.geeksforgeeks.org/sort-array-of-structs-with-qsort-in-c/
+																			// compararCampo ya tiene en cuenta el campo deseado por el que ordenaremos.
+		return &result;
+	}
+	else
+	{
+		result = 2;
+		return &result;
+	}
 
 	return &result;
 }
